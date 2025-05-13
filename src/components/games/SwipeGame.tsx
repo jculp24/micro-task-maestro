@@ -14,7 +14,7 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
   const [direction, setDirection] = useState<"left" | "right" | null>(null);
 
   // Get the current item
-  const currentItem = items[currentIndex];
+  const currentItem = items[currentIndex % items.length]; // Use modulo to cycle through items
   
   // Motion values for drag
   const x = useMotionValue(0);
@@ -39,12 +39,10 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
       // Reset direction and advance to next card
       setDirection(null);
       
-      // Move to next item or complete if done
-      if (currentIndex < items.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-      }
+      // Move to next item (cycling through available items)
+      setCurrentIndex(currentIndex + 1);
       
-      // Report progress
+      // Report progress each time
       onProgress();
       
       // Reset motion values
@@ -54,7 +52,7 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
 
   if (!currentItem) {
     return (
-      <div className="flex items-center justify-center h-60">
+      <div className="flex items-center justify-center h-[420px]">
         <p className="text-muted-foreground">No items to display</p>
       </div>
     );
@@ -79,6 +77,11 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
           <span>Yes</span>
           <Check size={20} />
         </motion.div>
+      </div>
+      
+      {/* Item count */}
+      <div className="absolute top-12 text-sm text-muted-foreground">
+        Card #{(currentIndex % items.length) + 1} of {items.length}
       </div>
       
       {/* Swipe Card */}

@@ -13,17 +13,15 @@ const ThisThatGame = ({ data, onProgress }: ThisThatGameProps) => {
   const [selectedSide, setSelectedSide] = useState<'left' | 'right' | null>(null);
   
   // Get current comparison
-  const currentComparison = comparisons[currentIndex];
+  const currentComparison = comparisons[currentIndex % comparisons.length]; // Use modulo to cycle through items
   
   const handleSelect = (side: 'left' | 'right') => {
     setSelectedSide(side);
     
     setTimeout(() => {
-      // Move to the next comparison
-      if (currentIndex < comparisons.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-        setSelectedSide(null);
-      }
+      // Move to the next comparison (cycling through available comparisons)
+      setCurrentIndex(currentIndex + 1);
+      setSelectedSide(null);
       
       // Report progress
       onProgress();
@@ -45,6 +43,9 @@ const ThisThatGame = ({ data, onProgress }: ThisThatGameProps) => {
       <div className="text-center mb-5">
         <p className="text-lg font-medium">{currentComparison.question}</p>
         <p className="text-sm text-muted-foreground mt-1">Tap your preference</p>
+        <p className="text-xs text-muted-foreground mt-1">
+          Card #{(currentIndex % comparisons.length) + 1} of {comparisons.length}
+        </p>
       </div>
       
       <div className="flex justify-between gap-4 w-full">

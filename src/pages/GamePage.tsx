@@ -23,22 +23,18 @@ const GamePage = () => {
   const { toast } = useToast();
   const [isGameCompleted, setIsGameCompleted] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [steps, setSteps] = useState(0);
   const [gameData, setGameData] = useState(null);
   const [reward, setReward] = useState(0);
-  const [showReward, setShowReward] = useState(false);
 
   useEffect(() => {
     // Reset game state when game type changes
     setIsGameCompleted(false);
     setProgress(0);
-    setShowReward(false);
     
     // Get mock data for the selected game
     const data = mockGameData[gameType || "swipe"];
     if (data) {
       setGameData(data);
-      setSteps(data.steps || 5);
       setReward(data.reward || 0.02);
     } else {
       navigate("/");
@@ -50,21 +46,31 @@ const GamePage = () => {
     }
   }, [gameType]);
 
+  // Update to track progress without completion
   const handleProgress = () => {
     const newProgress = progress + 1;
     setProgress(newProgress);
-    
-    if (newProgress >= steps) {
-      handleGameComplete();
-    }
   };
 
-  const handleGameComplete = () => {
-    setIsGameCompleted(true);
-    setTimeout(() => {
-      setShowReward(true);
-      completeTask(reward);
-    }, 500);
+  // Finish button handler - user decides when to complete
+  const handleFinishGame = () => {
+    if (progress > 0) {
+      setIsGameCompleted(true);
+      setTimeout(() => {
+        completeTask(reward);
+        navigate("/");
+        toast({
+          title: "Task completed!",
+          description: `You earned $${reward.toFixed(2)}.`,
+        });
+      }, 500);
+    } else {
+      toast({
+        title: "Can't complete yet",
+        description: "Please provide at least one response first.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleExitGame = () => {
@@ -75,14 +81,6 @@ const GamePage = () => {
     } else {
       navigate("/");
     }
-  };
-
-  const handleFinish = () => {
-    navigate("/");
-    toast({
-      title: "Task completed!",
-      description: `You earned $${reward.toFixed(2)}.`,
-    });
   };
 
   const renderGame = () => {
@@ -108,46 +106,42 @@ const GamePage = () => {
 
   return (
     <div className="h-full flex flex-col">
-      {showReward ? (
-        <RewardAnimation amount={reward} onFinish={handleFinish} />
-      ) : (
-        <>
-          <div className="flex items-center justify-between mb-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={handleExitGame} 
-              className="rounded-full"
-            >
-              <X size={24} />
-            </Button>
-            <div className="earning-tag">
-              ${reward.toFixed(2)}
-            </div>
+      <>
+        <div className="flex items-center justify-between mb-4">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleExitGame} 
+            className="rounded-full"
+          >
+            <X size={24} />
+          </Button>
+          <div className="earning-tag">
+            ${reward.toFixed(2)}
           </div>
-          
-          <GameHeader 
-            gameType={gameType || ""}
-            title={gameData?.title || ""}
-            description={gameData?.description || ""}
-          />
-          
-          <GameProgress current={progress} total={steps} />
-          
-          <div className="flex-1 game-container mt-4">
-            {renderGame()}
-            
-            {isGameCompleted && (
-              <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center rounded-lg">
-                <div className="text-center">
-                  <h2 className="text-2xl font-bold mb-2">Completed!</h2>
-                  <p className="text-muted-foreground mb-4">Processing your feedback...</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </>
-      )}
+        </div>
+        
+        <GameHeader 
+          gameType={gameType || ""}
+          title={gameData?.title || ""}
+          description={gameData?.description || ""}
+        />
+        
+        <GameProgress current={progress} total={-1} />
+        
+        <div className="flex-1 game-container mt-4">
+          {renderGame()}
+        </div>
+
+        {/* Finish button to let user decide when to stop */}
+        <Button 
+          onClick={handleFinishGame} 
+          className="mt-4 w-full"
+          disabled={isGameCompleted || progress === 0}
+        >
+          Complete Task & Collect Reward
+        </Button>
+      </>
     </div>
   );
 };
