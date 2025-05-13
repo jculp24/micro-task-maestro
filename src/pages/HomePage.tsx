@@ -40,42 +40,36 @@ const HomePage = () => {
       name: "Swipe",
       icon: <Gamepad className="h-8 w-8 text-bronze" />,
       description: "Rate items with simple swipe gestures",
-      bgColor: "from-bronze/10 to-bronze/5",
     },
     {
       id: "thisthat",
       name: "This/That",
       icon: <ArrowRight className="h-8 w-8 text-bronze" />,
       description: "Choose between two options",
-      bgColor: "from-teal/10 to-teal/5",
     },
     {
       id: "bracket",
       name: "Bracket",
       icon: <CircleDollarSign className="h-8 w-8 text-bronze" />,
       description: "Tournament style elimination voting",
-      bgColor: "from-bronze/20 to-bronze/10",
     },
     {
       id: "higherlower",
       name: "Higher/Lower",
       icon: <Thermometer className="h-8 w-8 text-bronze" />,
       description: "Guess if prices are higher or lower",
-      bgColor: "from-teal/20 to-teal/10",
     },
     {
       id: "soundbyte",
       name: "Sound Byte",
       icon: <Headphones className="h-8 w-8 text-bronze" />,
       description: "Rate audio clips and jingles",
-      bgColor: "from-bronze/15 to-bronze/5",
     },
     {
       id: "highlight",
       name: "Highlight",
       icon: <Image className="h-8 w-8 text-bronze" />,
       description: "Mark what you like in images",
-      bgColor: "from-teal/15 to-teal/5",
     }
   ];
 
@@ -103,15 +97,15 @@ const HomePage = () => {
           {games.map((game) => (
             <Card 
               key={game.id}
-              className={`bg-gradient-to-br ${game.bgColor} border-bronze/20 hover:border-bronze/40 cursor-pointer transition-all hover:shadow-md`}
+              className="bg-[#2D2D2D] border-bronze/20 hover:border-bronze/40 cursor-pointer transition-all hover:shadow-md"
               onClick={() => handleGameSelect(game.id)}
             >
               <CardContent className="p-4 flex flex-col items-center text-center">
-                <div className="rounded-full bg-white/50 p-3 mb-2">
+                <div className="rounded-full bg-gray-400/20 p-3 mb-2">
                   {game.icon}
                 </div>
-                <h3 className="font-medium text-lg">{game.name}</h3>
-                <p className="text-xs text-muted-foreground mt-1">{game.description}</p>
+                <h3 className="font-medium text-lg text-white">{game.name}</h3>
+                <p className="text-xs text-gray-300 mt-1">{game.description}</p>
               </CardContent>
             </Card>
           ))}
