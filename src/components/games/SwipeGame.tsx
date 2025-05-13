@@ -52,39 +52,20 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
 
   if (!currentItem) {
     return (
-      <div className="flex items-center justify-center h-[420px]">
+      <div className="flex items-center justify-center h-[500px]">
         <p className="text-muted-foreground">No items to display</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-[420px] relative">
-      {/* Indicators */}
-      <div className="flex gap-20 absolute top-2 w-full justify-center">
-        <motion.div 
-          style={{ opacity: leftOpacity }}
-          className="flex items-center gap-2 text-red-500 font-medium"
-        >
-          <X size={20} />
-          <span>No</span>
-        </motion.div>
-        
-        <motion.div 
-          style={{ opacity: rightOpacity }}
-          className="flex items-center gap-2 text-green-500 font-medium"
-        >
-          <span>Yes</span>
-          <Check size={20} />
-        </motion.div>
-      </div>
-      
+    <div className="flex flex-col items-center justify-between h-[500px] relative pb-4">
       {/* Item count */}
-      <div className="absolute top-12 text-sm text-muted-foreground">
+      <div className="text-sm text-muted-foreground mb-2">
         Card #{(currentIndex % items.length) + 1} of {items.length}
       </div>
       
-      {/* Swipe Card */}
+      {/* Swipe Card - Made larger */}
       <motion.div
         style={{ x, rotate }}
         drag="x"
@@ -97,7 +78,7 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
           : { x: 0 }
         }
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        className="absolute w-full max-w-xs bg-card shadow-xl rounded-xl cursor-grab active:cursor-grabbing"
+        className="w-full max-w-[300px] bg-card shadow-xl rounded-xl cursor-grab active:cursor-grabbing"
       >
         <div className="aspect-[3/4] w-full overflow-hidden rounded-t-xl">
           <img 
@@ -115,20 +96,39 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
         </div>
       </motion.div>
       
-      {/* Button controls */}
-      <div className="absolute bottom-3 flex gap-8">
+      {/* Indicators MOVED BELOW card */}
+      <div className="flex justify-between w-full max-w-[300px] mt-6">
+        <motion.div 
+          style={{ opacity: leftOpacity }}
+          className="flex items-center gap-2 text-red-500 font-medium"
+        >
+          <X size={20} />
+          <span>No</span>
+        </motion.div>
+        
+        <motion.div 
+          style={{ opacity: rightOpacity }}
+          className="flex items-center gap-2 text-green-500 font-medium"
+        >
+          <span>Yes</span>
+          <Check size={20} />
+        </motion.div>
+      </div>
+      
+      {/* Button controls - Less transparent */}
+      <div className="flex gap-8 mt-4">
         <button 
           onClick={() => handleSwipe("left")} 
-          className="w-14 h-14 rounded-full bg-red-100 text-red-500 flex items-center justify-center
-                     hover:bg-red-200 transition-colors dark:bg-red-900/30 dark:text-red-400"
+          className="w-14 h-14 rounded-full bg-red-200 text-red-600 flex items-center justify-center
+                     hover:bg-red-300 transition-colors dark:bg-red-900/70 dark:text-red-400"
         >
           <X size={28} />
         </button>
         
         <button 
           onClick={() => handleSwipe("right")} 
-          className="w-14 h-14 rounded-full bg-green-100 text-green-500 flex items-center justify-center
-                     hover:bg-green-200 transition-colors dark:bg-green-900/30 dark:text-green-400"
+          className="w-14 h-14 rounded-full bg-green-200 text-green-600 flex items-center justify-center
+                     hover:bg-green-300 transition-colors dark:bg-green-900/70 dark:text-green-400"
         >
           <Check size={28} />
         </button>
