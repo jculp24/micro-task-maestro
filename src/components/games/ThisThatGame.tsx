@@ -42,9 +42,9 @@ const ThisThatGame = ({ data, onProgress }: ThisThatGameProps) => {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="text-center mb-6">
+      <div className="text-center mb-5">
         <p className="text-lg font-medium">{currentComparison.question}</p>
-        <p className="text-sm text-muted-foreground">Tap your preference</p>
+        <p className="text-sm text-muted-foreground mt-1">Tap your preference</p>
       </div>
       
       <div className="flex justify-between gap-4 w-full">

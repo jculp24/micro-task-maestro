@@ -61,9 +61,9 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-80 relative">
+    <div className="flex flex-col items-center justify-center h-[420px] relative">
       {/* Indicators */}
-      <div className="flex gap-20 absolute top-4 w-full justify-center">
+      <div className="flex gap-20 absolute top-2 w-full justify-center">
         <motion.div 
           style={{ opacity: leftOpacity }}
           className="flex items-center gap-2 text-red-500 font-medium"
@@ -113,21 +113,21 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
       </motion.div>
       
       {/* Button controls */}
-      <div className="absolute bottom-0 flex gap-4">
+      <div className="absolute bottom-3 flex gap-8">
         <button 
           onClick={() => handleSwipe("left")} 
-          className="w-12 h-12 rounded-full bg-red-100 text-red-500 flex items-center justify-center
+          className="w-14 h-14 rounded-full bg-red-100 text-red-500 flex items-center justify-center
                      hover:bg-red-200 transition-colors dark:bg-red-900/30 dark:text-red-400"
         >
-          <X size={24} />
+          <X size={28} />
         </button>
         
         <button 
           onClick={() => handleSwipe("right")} 
-          className="w-12 h-12 rounded-full bg-green-100 text-green-500 flex items-center justify-center
+          className="w-14 h-14 rounded-full bg-green-100 text-green-500 flex items-center justify-center
                      hover:bg-green-200 transition-colors dark:bg-green-900/30 dark:text-green-400"
         >
-          <Check size={24} />
+          <Check size={28} />
         </button>
       </div>
     </div>
