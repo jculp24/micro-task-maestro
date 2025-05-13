@@ -35,7 +35,7 @@ const BracketGame = ({ data, onProgress }: BracketGameProps) => {
     setRounds(updatedRounds);
     
     // Move to the next match
-    if (currentMatch < Math.floor(rounds[currentRound].length / 2) - 1) {
+    if (currentMatch < Math.floor((rounds[currentRound]?.length || 0) / 2) - 1) {
       setCurrentMatch(currentMatch + 1);
     } else {
       // Move to the next round
@@ -84,6 +84,15 @@ const BracketGame = ({ data, onProgress }: BracketGameProps) => {
     );
   }
   
+  // Check if rounds array is empty or currentRound is out of bounds
+  if (!rounds || rounds.length === 0 || !rounds[currentRound]) {
+    return (
+      <div className="flex items-center justify-center h-60">
+        <p className="text-muted-foreground">Loading bracket...</p>
+      </div>
+    );
+  }
+  
   // Get the current match-up
   const startIdx = currentMatch * 2;
   const itemA = rounds[currentRound][startIdx];
@@ -102,7 +111,7 @@ const BracketGame = ({ data, onProgress }: BracketGameProps) => {
     <div className="flex flex-col items-center">
       <div className="text-sm text-center mb-4">
         <span className="font-medium">Round {currentRound + 1}</span>
-        <span className="text-muted-foreground"> • Match {currentMatch + 1} of {Math.floor(rounds[currentRound].length / 2)}</span>
+        <span className="text-muted-foreground"> • Match {currentMatch + 1} of {Math.floor((rounds[currentRound]?.length || 0) / 2)}</span>
       </div>
       
       <div className="text-center mb-6">
