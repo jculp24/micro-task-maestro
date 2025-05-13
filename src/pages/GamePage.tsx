@@ -111,9 +111,7 @@ const GamePage = () => {
           <Button variant="ghost" size="icon" onClick={handleExitGame} className="rounded-full">
             <X size={24} />
           </Button>
-          <div className="earning-tag">
-            ${reward.toFixed(2)}
-          </div>
+          
         </div>
         
         <GameHeader gameType={gameType || ""} title={gameData?.title || ""} description={gameData?.description || ""} />
