@@ -14,7 +14,7 @@ import {
 import { mockTransactions } from "@/data/mockTransactions";
 import WalletStats from "@/components/wallet/WalletStats";
 import TransactionList from "@/components/wallet/TransactionList";
-import { BuildingBank, TrendingUp, Heart } from "lucide-react";
+import { Building, TrendingUp, Heart } from "lucide-react";
 
 const WalletPage = () => {
   const { user } = useUser();
@@ -142,7 +142,7 @@ const WalletPage = () => {
               disabled={!user || user.balance < 5 || isProcessing}
               className="w-full btn-bronze flex justify-center items-center"
             >
-              <BuildingBank className="mr-2" size={18} /> Transfer to Bank
+              <Building className="mr-2" size={18} /> Transfer to Bank
             </Button>
             
             <Button 
