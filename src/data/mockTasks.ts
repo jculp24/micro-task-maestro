@@ -1,0 +1,77 @@
+
+import { Task } from "@/types/task";
+
+export const mockTasks: Task[] = [
+  {
+    id: "task1",
+    title: "Rate these new sneaker designs",
+    description: "Help us choose the best designs for our upcoming collection",
+    reward: 0.25,
+    gameType: "swipe",
+    timeEstimate: "2 min",
+    category: "fashion",
+  },
+  {
+    id: "task2",
+    title: "Compare food packaging designs",
+    description: "Which packaging would make you more likely to purchase?",
+    reward: 0.15,
+    gameType: "thisthat",
+    timeEstimate: "1 min",
+    category: "food",
+  },
+  {
+    id: "task3",
+    title: "Guess smartphone prices",
+    description: "Test your knowledge of current market prices",
+    reward: 0.30,
+    gameType: "higherlower",
+    timeEstimate: "3 min",
+    category: "tech",
+  },
+  {
+    id: "task4",
+    title: "Rate audio jingles",
+    description: "Help us choose our new brand sound",
+    reward: 0.20,
+    gameType: "soundbyte",
+    timeEstimate: "2 min",
+    category: "entertainment",
+  },
+  {
+    id: "task5",
+    title: "Tournament: Best travel destinations",
+    description: "Help us rank these popular travel spots",
+    reward: 0.50,
+    gameType: "bracket",
+    timeEstimate: "4 min",
+    category: "travel",
+  },
+  {
+    id: "task6",
+    title: "Highlight what you like about this ad",
+    description: "Give feedback on our new campaign",
+    reward: 0.35,
+    gameType: "highlight",
+    timeEstimate: "3 min",
+    category: "entertainment",
+  },
+  {
+    id: "task7",
+    title: "Rate these fitness app interfaces",
+    description: "Which design is more appealing and functional?",
+    reward: 0.20,
+    gameType: "swipe",
+    timeEstimate: "2 min",
+    category: "health",
+  },
+  {
+    id: "task8",
+    title: "Compare investment app features",
+    description: "Help us prioritize features for our next update",
+    reward: 0.40,
+    gameType: "thisthat",
+    timeEstimate: "3 min",
+    category: "finance",
+  }
+];

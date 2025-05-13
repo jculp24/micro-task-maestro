@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,18 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// TwoCents Custom Colors
+				bronze: {
+					DEFAULT: '#CF955F',
+					light: '#DDB277',
+					dark: '#A67443',
+				},
+				teal: {
+					DEFAULT: '#4ECDC4',
+					light: '#7EDFD9',
+					dark: '#3AA39B',
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +96,45 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'slide-in-right': {
+					'0%': { transform: 'translateX(100%)' },
+					'100%': { transform: 'translateX(0)' }
+				},
+				'slide-out-right': {
+					'0%': { transform: 'translateX(0)' },
+					'100%': { transform: 'translateX(100%)' }
+				},
+				'coin-fall': {
+					'0%': { transform: 'translateY(-20px)', opacity: '0' },
+					'50%': { opacity: '1' },
+					'100%': { transform: 'translateY(0)', opacity: '1' }
+				},
+				'pulse-bronze': {
+					'0%, 100%': { boxShadow: '0 0 0 0 rgba(207, 149, 95, 0.4)' },
+					'50%': { boxShadow: '0 0 0 12px rgba(207, 149, 95, 0)' }
+				},
+				'scale-up': {
+					'0%': { transform: 'scale(0.7)', opacity: '0' },
+					'100%': { transform: 'scale(1)', opacity: '1' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'slide-in-right': 'slide-in-right 0.3s ease-out',
+				'slide-out-right': 'slide-out-right 0.3s ease-out',
+				'coin-fall': 'coin-fall 0.5s ease-out forwards',
+				'pulse-bronze': 'pulse-bronze 1.5s infinite',
+				'scale-up': 'scale-up 0.3s ease-out forwards'
+			},
+			fontFamily: {
+				sans: [
+					'SF Pro Display', 
+					'Roboto',
+					'system-ui',
+					'sans-serif',
+				],
 			}
 		}
 	},
