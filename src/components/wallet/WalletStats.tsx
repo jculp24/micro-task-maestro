@@ -1,20 +1,11 @@
-
 import { useUser } from "@/providers/UserProvider";
-import { 
-  Card, 
-  CardContent,
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 const WalletStats = () => {
-  const { user } = useUser();
-  
+  const {
+    user
+  } = useUser();
   if (!user) return null;
-
-  return (
-    <Card className="bg-gradient-to-r from-bronze/10 to-bronze/5 border-bronze/20 overflow-hidden">
+  return <Card className="bg-gradient-to-r from-bronze/10 to-bronze/5 border-bronze/20 overflow-hidden">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg">Your Balance</CardTitle>
         <CardDescription>
@@ -26,9 +17,7 @@ const WalletStats = () => {
           <div className="text-4xl font-bold coin">
             ${user.balance.toFixed(2)}
           </div>
-          <div className="text-sm text-muted-foreground">
-            from {user.completedTasks} completed tasks
-          </div>
+          
         </div>
 
         <div className="grid grid-cols-2 gap-4 mt-4">
@@ -46,8 +35,6 @@ const WalletStats = () => {
           </div>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default WalletStats;
