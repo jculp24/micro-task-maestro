@@ -29,6 +29,7 @@ const TaskCard = ({ task }: TaskCardProps) => {
       case "soundbyte": return "Sound Byte";
       case "higherlower": return "Higher or Lower";
       case "highlight": return "Highlight";
+      case "adlibpro": return "Ad Lib Pro";
       default: return type;
     }
   };

@@ -73,5 +73,23 @@ export const mockTasks: Task[] = [
     gameType: "thisthat",
     timeEstimate: "3 min",
     category: "finance",
+  },
+  {
+    id: "task9",
+    title: "Create an ad pitch for athletic shoes",
+    description: "Fill in the blanks to create a compelling message",
+    reward: 1.00,
+    gameType: "adlibpro",
+    timeEstimate: "30 sec",
+    category: "marketing",
+  },
+  {
+    id: "task10",
+    title: "Voice your opinion on this app",
+    description: "Share how you would use this product",
+    reward: 1.25,
+    gameType: "adlibpro",
+    timeEstimate: "20 sec",
+    category: "tech",
   }
 ];

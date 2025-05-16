@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -13,6 +14,7 @@ import ThisThatGame from "@/components/games/ThisThatGame";
 import SoundByteGame from "@/components/games/SoundByteGame";
 import HigherLowerGame from "@/components/games/HigherLowerGame";
 import HighlightGame from "@/components/games/HighlightGame";
+import AdLibGame from "@/components/games/AdLibGame";
 import { mockGameData } from "@/data/mockGameData";
 const GamePage = () => {
   const {
@@ -101,6 +103,8 @@ const GamePage = () => {
         return <HigherLowerGame data={gameData} onProgress={handleProgress} />;
       case "highlight":
         return <HighlightGame data={gameData} onProgress={handleProgress} />;
+      case "adlibpro":
+        return <AdLibGame data={gameData} onProgress={handleProgress} />;
       default:
         return <div>Game not found</div>;
     }
@@ -123,7 +127,14 @@ const GamePage = () => {
         </div>
 
         {/* Finish button to let user decide when to stop */}
-        
+        <Button 
+          onClick={handleFinishGame} 
+          variant="outline" 
+          className="mt-4 w-full border-bronze text-bronze hover:bg-bronze hover:text-white"
+          disabled={progress === 0}
+        >
+          Finish & Collect ${reward.toFixed(2)}
+        </Button>
       </>
     </div>;
 };

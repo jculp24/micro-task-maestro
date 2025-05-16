@@ -1,4 +1,3 @@
-
 export const mockGameData = {
   swipe: {
     title: "Rate these sneaker designs",
@@ -220,4 +219,37 @@ export const mockGameData = {
       },
     ],
   },
+  
+  adlibpro: {
+    title: "Ad Lib: Pitch your thoughts",
+    description: "Fill in the blanks to create a compelling ad message",
+    steps: 3,
+    reward: 1.25,
+    templates: [
+      {
+        id: "adlib1",
+        prompt: "This product makes me feel ___ because ___.",
+        image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&auto=format",
+        productName: "Athletic Shoes",
+        category: "Emotion",
+        suggestions: ["energized", "confident", "powerful", "stylish", "comfortable"]
+      },
+      {
+        id: "adlib2",
+        prompt: "I'd use this app for ___ to ___.",
+        image: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&auto=format",
+        productName: "Fitness Tracker",
+        category: "Use Case",
+        suggestions: ["workouts", "tracking goals", "motivation", "competing", "improving"]
+      },
+      {
+        id: "adlib3",
+        prompt: "I'd share this brand with ___ because it's ___.",
+        image: "https://images.unsplash.com/photo-1542219550-37153b2f92bf?w=800&auto=format",
+        productName: "Eco-Friendly Water Bottle",
+        category: "Audience",
+        suggestions: ["friends", "family", "coworkers", "sustainable", "practical"]
+      }
+    ]
+  }
 };

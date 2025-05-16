@@ -4,7 +4,15 @@ import { useNavigate } from "react-router-dom";
 import UserStats from "@/components/user/UserStats";
 import { useUser } from "@/providers/UserProvider";
 import { useToast } from "@/components/ui/use-toast";
-import { Gamepad, CircleDollarSign, ArrowRight, Thermometer, Headphones, Image } from "lucide-react";
+import { 
+  Gamepad, 
+  CircleDollarSign, 
+  ArrowRight, 
+  Thermometer, 
+  Headphones, 
+  Image,
+  MessageCircle 
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 const HomePage = () => {
@@ -70,6 +78,12 @@ const HomePage = () => {
       name: "Highlight",
       icon: <Image className="h-8 w-8 text-bronze" />,
       description: "Mark what you like in images",
+    },
+    {
+      id: "adlibpro",
+      name: "Ad Lib Pro",
+      icon: <MessageCircle className="h-8 w-8 text-bronze" />,
+      description: "Fill in the blanks to create ad messages",
     }
   ];
 
@@ -85,7 +99,7 @@ const HomePage = () => {
       
       {isLoading ? (
         <div className="grid grid-cols-2 gap-4">
-          {[...Array(6)].map((_, i) => (
+          {[...Array(7)].map((_, i) => (
             <div 
               key={i} 
               className="h-36 bg-muted animate-pulse rounded-lg"

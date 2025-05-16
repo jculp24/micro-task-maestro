@@ -1,3 +1,4 @@
+
 interface GameHeaderProps {
   gameType: string;
   title: string;
@@ -23,6 +24,8 @@ const GameHeader = ({
         return "Higher or Lower";
       case "highlight":
         return "Highlight";
+      case "adlibpro":
+        return "Ad Lib Pro";
       default:
         return type;
     }
