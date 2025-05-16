@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import LogoItem from './logo-sort/LogoItem';
@@ -28,7 +28,11 @@ const LogoSortGame = ({ data, onProgress }: LogoSortProps) => {
   const [sortedLogos, setSortedLogos] = useState<Record<string, string>>({});
   const [timer, setTimer] = useState<number>(20);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(true);
-
+  const [activeDragLogo, setActiveDragLogo] = useState<string | null>(null);
+  
+  // References to bin elements for collision detection
+  const binRefs = useRef<Map<string, HTMLElement>>(new Map());
+  
   // Handle timer
   useEffect(() => {
     if (!isTimerRunning) return;
@@ -51,6 +55,41 @@ const LogoSortGame = ({ data, onProgress }: LogoSortProps) => {
   const sortedCount = Object.keys(sortedLogos).length;
   const minSortedRequired = Math.min(10, logos.length); // At least 10 or all logos if less than 10
   const canSubmit = sortedCount >= minSortedRequired || timer === 0;
+  
+  // Handle drag start
+  const handleDragStart = (logoId: string) => {
+    setActiveDragLogo(logoId);
+  };
+  
+  // Handle drag end - check if logo is over a bin
+  const handleDragEnd = (logoId: string, event: MouseEvent) => {
+    if (!activeDragLogo) return;
+    
+    // Get all bin elements
+    const binElements = document.querySelectorAll('[data-bin-id]');
+    
+    // Check if the logo was dropped on a bin
+    for (const binElement of binElements) {
+      const rect = binElement.getBoundingClientRect();
+      
+      // Check if the mouse position is inside the bin's rectangle
+      if (
+        event.clientX >= rect.left && 
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom
+      ) {
+        // Found a bin that the logo was dropped on
+        const binId = binElement.getAttribute('data-bin-id');
+        if (binId) {
+          handleDrop(logoId, binId);
+          break;
+        }
+      }
+    }
+    
+    setActiveDragLogo(null);
+  };
 
   // Handle logo drop into bin
   const handleDrop = (logoId: string, binId: string) => {
@@ -102,6 +141,8 @@ const LogoSortGame = ({ data, onProgress }: LogoSortProps) => {
                 image={logo.image}
                 isSorted={isSorted}
                 sortedBinId={sortedLogos[logo.id]}
+                onDragStart={() => handleDragStart(logo.id)}
+                onDragEnd={(event: any) => handleDragEnd(logo.id, event)}
               />
             );
           })}

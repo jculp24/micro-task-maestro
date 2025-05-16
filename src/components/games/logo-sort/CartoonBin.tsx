@@ -1,7 +1,6 @@
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useEffect } from 'react';
-import { useDroppable } from '@/hooks/use-droppable';
 
 interface CartoonBinProps {
   id: string;
@@ -10,16 +9,8 @@ interface CartoonBinProps {
 }
 
 const CartoonBin = ({ id, label, onDrop }: CartoonBinProps) => {
-  // Custom hook to handle droppable functionality
-  const { setNodeRef, isOver, active } = useDroppable({
-    id,
-    onDrop: (itemId) => {
-      if (itemId) {
-        onDrop(itemId);
-      }
-    },
-  });
-
+  const [isOver, setIsOver] = useState(false);
+  
   // Pulse animation for the label
   const pulseVariants = {
     pulse: {
@@ -44,21 +35,23 @@ const CartoonBin = ({ id, label, onDrop }: CartoonBinProps) => {
       </motion.div>
       
       {/* Bin visual */}
-      <div
-        ref={setNodeRef}
+      <motion.div
         className={`w-24 h-24 rounded-lg flex items-center justify-center p-2
           ${isOver ? 'bg-bronze/30 border-bronze' : 'bg-bronze/10 border-bronze/30'}
           border-2 transition-colors overflow-hidden relative`}
+        onHoverStart={() => setIsOver(true)}
+        onHoverEnd={() => setIsOver(false)}
+        data-bin-id={id}
       >
         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-bronze/20 rounded-b-lg"></div>
         
-        {/* Bin inner content - shows active logo being dragged */}
-        {isOver && active && (
+        {/* Bin inner content */}
+        {isOver && (
           <div className="text-bronze text-xs font-medium text-center">
             Drop Here
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 };
