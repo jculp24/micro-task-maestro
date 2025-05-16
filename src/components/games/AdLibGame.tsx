@@ -2,7 +2,8 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Mic, MicOff, Send, Volume2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Mic, MicOff, Send, Volume2, ArrowRight } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface AdLibGameProps {
@@ -15,24 +16,27 @@ const AdLibGame = ({ data, onProgress }: AdLibGameProps) => {
   const templates = data?.templates || [];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [inputMethod, setInputMethod] = useState<"text" | "voice">("text");
-  const [response, setResponse] = useState("");
+  const [responses, setResponses] = useState<string[]>([]);
+  const [currentBlankIndex, setCurrentBlankIndex] = useState(0);
+  const [currentInput, setCurrentInput] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Get current template
   const currentTemplate = templates[currentIndex % templates.length];
   
-  // Word counter
-  const wordCount = response.trim().split(/\s+/).filter(Boolean).length;
-  
   // Parse template to identify blanks
   const promptParts = currentTemplate?.prompt.split('___') || [];
+  const blankCount = promptParts.length - 1;
   
+  // Reset when template changes
   useEffect(() => {
-    // Reset states when template changes
-    setResponse("");
+    setResponses([]);
+    setCurrentBlankIndex(0);
+    setCurrentInput("");
     setIsRecording(false);
     setRecordingTime(0);
     setSelectedSuggestion(null);
@@ -41,6 +45,13 @@ const AdLibGame = ({ data, onProgress }: AdLibGameProps) => {
       timerRef.current = null;
     }
   }, [currentIndex]);
+  
+  // Focus input when blank index changes
+  useEffect(() => {
+    if (inputMethod === "text" && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [currentBlankIndex, inputMethod]);
   
   // Recording timer
   useEffect(() => {
@@ -82,7 +93,7 @@ const AdLibGame = ({ data, onProgress }: AdLibGameProps) => {
     // In a real app, this would process the actual recording
     // For now we just simulate having recorded something
     if (recordingTime > 0) {
-      setResponse(`[Voice recording: ${recordingTime} seconds]`);
+      setCurrentInput(`[Voice recording: ${recordingTime} seconds]`);
       toast({
         title: "Recording saved",
         description: `${recordingTime} second recording captured`
@@ -99,32 +110,82 @@ const AdLibGame = ({ data, onProgress }: AdLibGameProps) => {
         stopRecording();
       }
     }
-    setResponse("");
+    setCurrentInput("");
   };
   
   const addSuggestion = (suggestion: string) => {
     setSelectedSuggestion(suggestion);
-    const currentText = response.trim();
-    setResponse(currentText ? `${currentText} ${suggestion}` : suggestion);
+    setCurrentInput(suggestion);
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+  
+  // Handle next blank or submit
+  const handleNextBlank = () => {
+    if (!currentInput.trim()) {
+      toast({
+        title: "Input required",
+        description: "Please provide a response for this blank",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const newResponses = [...responses];
+    newResponses[currentBlankIndex] = currentInput.trim();
+    setResponses(newResponses);
+    
+    // If there are more blanks, move to next one
+    if (currentBlankIndex < blankCount - 1) {
+      setCurrentBlankIndex(currentBlankIndex + 1);
+      setCurrentInput("");
+      setSelectedSuggestion(null);
+    } else {
+      // All blanks are filled, ready to submit
+      handleCompleteTemplate(newResponses);
+    }
+  };
+  
+  const handleBlankKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleNextBlank();
+    }
+  };
+  
+  // Calculate total word count from all responses
+  const calculateWordCount = (resps: string[]) => {
+    return resps
+      .join(" ")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .length;
   };
   
   // Calculate payout based on input method and length
-  const calculatePayout = () => {
+  const calculatePayout = (resps: string[]) => {
     if (inputMethod === "text") {
+      const wordCount = calculateWordCount(resps);
       return wordCount <= 25 ? 0.75 : 1.00;
     } else {
       return recordingTime <= 15 ? 1.25 : 1.50;
     }
   };
   
-  const handleSubmit = () => {
-    if (inputMethod === "text" && wordCount < 10) {
-      toast({
-        title: "Too short",
-        description: "Please provide at least 10 words for your response",
-        variant: "destructive"
-      });
-      return;
+  // Handle submission of the entire template
+  const handleCompleteTemplate = (finalResponses: string[]) => {
+    if (inputMethod === "text") {
+      const wordCount = calculateWordCount(finalResponses);
+      if (wordCount < 10) {
+        toast({
+          title: "Too short",
+          description: "Please provide a total of at least 10 words across all blanks",
+          variant: "destructive"
+        });
+        return;
+      }
     }
     
     if (inputMethod === "voice" && recordingTime < 5) {
@@ -137,7 +198,7 @@ const AdLibGame = ({ data, onProgress }: AdLibGameProps) => {
     }
     
     // Show success and move to the next template or complete
-    const payout = calculatePayout();
+    const payout = calculatePayout(finalResponses);
     toast({
       title: "Response submitted!",
       description: `Great pitch! You earned $${payout.toFixed(2)}`
@@ -161,6 +222,34 @@ const AdLibGame = ({ data, onProgress }: AdLibGameProps) => {
     );
   }
 
+  // Render the prompt with filled and current blanks highlighted differently
+  const renderPrompt = () => {
+    return (
+      <div className="mb-4 text-lg">
+        {promptParts.map((part, index) => (
+          <span key={index}>
+            {part}
+            {index < promptParts.length - 1 && (
+              <span 
+                className={`inline-block px-2 mx-1 rounded ${
+                  index < currentBlankIndex 
+                    ? "bg-bronze/20 border border-bronze text-bronze" 
+                    : index === currentBlankIndex 
+                      ? "bg-bronze/30 border-2 border-bronze text-bronze font-medium animate-pulse" 
+                      : "bg-bronze/10 border border-bronze/40 text-muted-foreground"
+                }`}
+              >
+                {index < currentBlankIndex 
+                  ? responses[index] 
+                  : `blank ${index + 1}`}
+              </span>
+            )}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col h-[500px] relative">
       {/* Product/Ad Image */}
@@ -183,19 +272,24 @@ const AdLibGame = ({ data, onProgress }: AdLibGameProps) => {
         </div>
       </div>
       
-      {/* Prompt with blanks highlighted */}
-      <div className="mb-4 text-lg">
-        {promptParts.map((part, index) => (
-          <span key={index}>
-            {part}
-            {index < promptParts.length - 1 && (
-              <span className="inline-block px-1 mx-1 rounded bg-bronze/20 border border-bronze/40 text-bronze">
-                blank {index + 1}
-              </span>
-            )}
-          </span>
+      {/* Progress indicator for blanks */}
+      <div className="mb-3 flex items-center gap-1">
+        {[...Array(blankCount)].map((_, i) => (
+          <div 
+            key={i} 
+            className={`h-2 flex-1 rounded-full ${
+              i < currentBlankIndex 
+                ? "bg-bronze" 
+                : i === currentBlankIndex 
+                  ? "bg-bronze/50" 
+                  : "bg-muted"
+            }`}
+          />
         ))}
       </div>
+      
+      {/* Prompt with blanks highlighted */}
+      {renderPrompt()}
       
       {/* Input Method Toggle */}
       <div className="flex items-center gap-2 mb-3">
@@ -220,19 +314,24 @@ const AdLibGame = ({ data, onProgress }: AdLibGameProps) => {
       {/* Text Input Method */}
       {inputMethod === "text" && (
         <>
-          <Textarea
-            placeholder="Type your response here..."
-            className="min-h-[100px] resize-none border-bronze/30 focus-visible:ring-bronze"
-            value={response}
-            onChange={(e) => setResponse(e.target.value)}
-          />
-          <div className="flex justify-between text-sm mt-1 text-muted-foreground">
-            <span>{wordCount} words</span>
-            <span>${wordCount <= 25 ? "0.75" : "1.00"}</span>
+          <div className="mb-2">
+            <Input
+              ref={inputRef}
+              placeholder={`Enter your response for blank ${currentBlankIndex + 1}...`}
+              className="border-bronze/30 focus-visible:ring-bronze"
+              value={currentInput}
+              onChange={(e) => setCurrentInput(e.target.value)}
+              onKeyDown={handleBlankKeyPress}
+            />
+            {currentInput && (
+              <div className="flex justify-between text-sm mt-1 text-muted-foreground">
+                <span>{currentInput.trim().split(/\s+/).filter(Boolean).length} words</span>
+              </div>
+            )}
           </div>
           
           {/* Word Suggestions */}
-          <div className="mt-3 mb-4">
+          <div className="mb-4">
             <p className="text-xs text-muted-foreground mb-1">Suggestions (click to add):</p>
             <div className="flex flex-wrap gap-2">
               {currentTemplate.suggestions.map((suggestion: string) => (
@@ -286,42 +385,48 @@ const AdLibGame = ({ data, onProgress }: AdLibGameProps) => {
           ) : (
             <>
               <div className="text-center mb-4">
-                {response ? (
+                {currentInput ? (
                   <>
                     <Volume2 className="mx-auto h-12 w-12 text-bronze mb-2" />
-                    <p className="text-lg">{response}</p>
+                    <p className="text-lg">{currentInput}</p>
                     <p className="text-sm text-muted-foreground mt-2">
                       ${recordingTime <= 15 ? "1.25" : "1.50"}
                     </p>
                   </>
                 ) : (
                   <>
-                    <p className="text-lg mb-1">Tap to start recording</p>
+                    <p className="text-lg mb-1">Tap to start recording for blank {currentBlankIndex + 1}</p>
                     <p className="text-sm text-muted-foreground">
                       (5-20 seconds)
                     </p>
                   </>
                 )}
               </div>
-              <Button 
-                onClick={startRecording} 
-                variant="outline"
-                className="rounded-full w-14 h-14 p-0 border-bronze text-bronze hover:bg-bronze hover:text-white"
-              >
-                <Mic className="h-6 w-6" />
-              </Button>
+              {!currentInput ? (
+                <Button 
+                  onClick={startRecording} 
+                  variant="outline"
+                  className="rounded-full w-14 h-14 p-0 border-bronze text-bronze hover:bg-bronze hover:text-white"
+                >
+                  <Mic className="h-6 w-6" />
+                </Button>
+              ) : null}
             </>
           )}
         </div>
       )}
       
-      {/* Submit Button */}
+      {/* Next/Submit Button */}
       <Button 
-        onClick={handleSubmit}
-        disabled={inputMethod === "text" ? wordCount < 10 : recordingTime < 5}
+        onClick={handleNextBlank}
+        disabled={!currentInput.trim()}
         className="mt-auto bg-bronze hover:bg-bronze-dark text-white shadow-md"
       >
-        <Send className="mr-2 h-4 w-4" /> Pitch It!
+        {currentBlankIndex < blankCount - 1 ? (
+          <>Next Blank <ArrowRight className="ml-1 h-4 w-4" /></>
+        ) : (
+          <><Send className="mr-2 h-4 w-4" /> Pitch It!</>
+        )}
       </Button>
     </div>
   );
