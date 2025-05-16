@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
@@ -142,7 +141,7 @@ const LogoSortGame = ({ data, onProgress }: LogoSortProps) => {
                 isSorted={isSorted}
                 sortedBinId={sortedLogos[logo.id]}
                 onDragStart={() => handleDragStart(logo.id)}
-                onDragEnd={(event: any) => handleDragEnd(logo.id, event)}
+                onDragEnd={() => handleDragEnd(logo.id, event as unknown as MouseEvent)}
               />
             );
           })}

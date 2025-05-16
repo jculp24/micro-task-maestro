@@ -25,7 +25,7 @@ const LogoItem = ({
   const [isDragging, setIsDragging] = useState(false);
   
   // We'll use Framer Motion's own drag handlers instead of our custom hook
-  const handleDragStart = () => {
+  const handleDragStart = (event: any, info: any) => {
     if (isSorted) return;
     setIsDragging(true);
     if (onDragStart) onDragStart();
@@ -35,9 +35,6 @@ const LogoItem = ({
     if (isSorted) return;
     setIsDragging(false);
     if (onDragEnd) onDragEnd();
-    
-    // Here we could add custom logic for detecting which bin the logo was dropped on
-    // based on the final position using info.point.x and info.point.y
   };
 
   return (
