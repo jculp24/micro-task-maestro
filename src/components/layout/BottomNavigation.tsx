@@ -1,11 +1,11 @@
 
 import { NavLink } from "react-router-dom";
-import { Home, Wallet, User, Gamepad } from "lucide-react";
+import { Home, Wallet, User } from "lucide-react";
 
 const BottomNavigation = () => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 h-16 bg-background/90 backdrop-blur-sm z-10 border-t border-border">
-      <div className="grid grid-cols-4 h-full max-w-md mx-auto">
+      <div className="grid grid-cols-3 h-full max-w-md mx-auto">
         <NavLink 
           to="/" 
           className={({ isActive }) => 
@@ -14,16 +14,6 @@ const BottomNavigation = () => {
         >
           <Home size={22} />
           <span className="text-xs mt-1">Home</span>
-        </NavLink>
-        
-        <NavLink 
-          to="/game/swipe" 
-          className={({ isActive }) => 
-            `flex flex-col items-center justify-center ${isActive ? 'text-bronze' : 'text-muted-foreground'}`
-          }
-        >
-          <Gamepad size={22} />
-          <span className="text-xs mt-1">Games</span>
         </NavLink>
         
         <NavLink 
