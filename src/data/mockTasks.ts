@@ -91,5 +91,14 @@ export const mockTasks: Task[] = [
     gameType: "adlibpro",
     timeEstimate: "20 sec",
     category: "tech",
+  },
+  {
+    id: "task11",
+    title: "Sort streaming services by preference",
+    description: "Help us understand which services users prefer",
+    reward: 0.15,
+    gameType: "logosort",
+    timeEstimate: "20 sec",
+    category: "entertainment",
   }
 ];

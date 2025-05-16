@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -15,6 +14,7 @@ import SoundByteGame from "@/components/games/SoundByteGame";
 import HigherLowerGame from "@/components/games/HigherLowerGame";
 import HighlightGame from "@/components/games/HighlightGame";
 import AdLibGame from "@/components/games/AdLibGame";
+import LogoSortGame from "@/components/games/LogoSortGame";
 import { mockGameData } from "@/data/mockGameData";
 const GamePage = () => {
   const {
@@ -105,6 +105,8 @@ const GamePage = () => {
         return <HighlightGame data={gameData} onProgress={handleProgress} />;
       case "adlibpro":
         return <AdLibGame data={gameData} onProgress={handleProgress} />;
+      case "logosort":
+        return <LogoSortGame data={gameData} onProgress={handleProgress} />;
       default:
         return <div>Game not found</div>;
     }

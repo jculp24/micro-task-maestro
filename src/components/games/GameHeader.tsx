@@ -26,6 +26,8 @@ const GameHeader = ({
         return "Highlight";
       case "adlibpro":
         return "Ad Lib Pro";
+      case "logosort":
+        return "Logo Sort";
       default:
         return type;
     }

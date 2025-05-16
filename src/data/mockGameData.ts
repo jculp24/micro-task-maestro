@@ -251,5 +251,93 @@ export const mockGameData = {
         suggestions: ["friends", "family", "coworkers", "sustainable", "practical"]
       }
     ]
+  },
+  
+  logosort: {
+    title: "Sort Streaming Services",
+    description: "Drag and drop streaming service logos into the categories that best describe your preference",
+    steps: 15,
+    reward: 0.15,
+    bins: [
+      { id: "bin1", label: "Subscribe" },
+      { id: "bin2", label: "Don't Use" }
+    ],
+    logos: [
+      {
+        id: "logo1",
+        name: "Netflix",
+        image: "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=800&auto=format",
+      },
+      {
+        id: "logo2",
+        name: "Hulu",
+        image: "https://images.unsplash.com/photo-1620085330222-1a0a03e49e1a?w=800&auto=format",
+      },
+      {
+        id: "logo3",
+        name: "Disney+",
+        image: "https://images.unsplash.com/photo-1608779607397-ab69b6283407?w=800&auto=format",
+      },
+      {
+        id: "logo4",
+        name: "Prime Video",
+        image: "https://images.unsplash.com/photo-1554252116-bcdb146e720b?w=800&auto=format",
+      },
+      {
+        id: "logo5",
+        name: "HBO Max",
+        image: "https://images.unsplash.com/photo-1627873649417-c67f701f1949?w=800&auto=format",
+      },
+      {
+        id: "logo6",
+        name: "Apple TV+",
+        image: "https://images.unsplash.com/photo-1528109966604-5a6d6a5e3602?w=800&auto=format",
+      },
+      {
+        id: "logo7",
+        name: "Paramount+",
+        image: "https://images.unsplash.com/photo-1626864568782-7c3ddb0a45f6?w=800&auto=format",
+      },
+      {
+        id: "logo8",
+        name: "Peacock",
+        image: "https://images.unsplash.com/photo-1616469829581-73993eb86b02?w=800&auto=format",
+      },
+      {
+        id: "logo9",
+        name: "Discovery+",
+        image: "https://images.unsplash.com/photo-1590856029874-25d52bc59b3d?w=800&auto=format",
+      },
+      {
+        id: "logo10",
+        name: "YouTube TV",
+        image: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800&auto=format",
+      },
+      {
+        id: "logo11",
+        name: "Sling TV",
+        image: "https://images.unsplash.com/photo-1561688899-9a29a0087961?w=800&auto=format",
+      },
+      {
+        id: "logo12",
+        name: "Crunchyroll",
+        image: "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=800&auto=format",
+      },
+      {
+        id: "logo13",
+        name: "ESPN+",
+        image: "https://images.unsplash.com/photo-1580850706413-50d00a8cf412?w=800&auto=format",
+      },
+      {
+        id: "logo14",
+        name: "Funimation",
+        image: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800&auto=format",
+      },
+      {
+        id: "logo15",
+        name: "Shudder",
+        image: "https://images.unsplash.com/photo-1603665760273-86b1ec770f62?w=800&auto=format",
+      }
+    ],
   }
 };

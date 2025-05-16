@@ -11,7 +11,8 @@ import {
   Thermometer, 
   Headphones, 
   Image,
-  MessageCircle 
+  MessageCircle,
+  Grid
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -84,6 +85,12 @@ const HomePage = () => {
       name: "Ad Lib Pro",
       icon: <MessageCircle className="h-8 w-8 text-bronze" />,
       description: "Fill in the blanks to create ad messages",
+    },
+    {
+      id: "logosort",
+      name: "Logo Sort",
+      icon: <Grid className="h-8 w-8 text-bronze" />,
+      description: "Sort logos into categories",
     }
   ];
 
@@ -99,7 +106,7 @@ const HomePage = () => {
       
       {isLoading ? (
         <div className="grid grid-cols-2 gap-4">
-          {[...Array(7)].map((_, i) => (
+          {[...Array(8)].map((_, i) => (
             <div 
               key={i} 
               className="h-36 bg-muted animate-pulse rounded-lg"
