@@ -99,13 +99,13 @@ const HomePage = () => {
   };
 
   return (
-    <div className="py-4 space-y-6">
+    <div className="p-6 space-y-6">
       <UserStats />
       
       <h2 className="text-xl font-semibold">Choose a Game</h2>
       
       {isLoading ? (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-5">
           {[...Array(8)].map((_, i) => (
             <div 
               key={i} 
@@ -114,7 +114,7 @@ const HomePage = () => {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-5">
           {games.map((game) => (
             <Card 
               key={game.id}
