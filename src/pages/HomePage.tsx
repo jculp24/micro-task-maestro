@@ -47,50 +47,50 @@ const HomePage = () => {
     {
       id: "swipe",
       name: "Swipe",
-      icon: <Gamepad className="h-8 w-8 text-bronze" />,
-      description: "Flick your way to fortune! Swipe hot or not on trending products",
+      icon: <Gamepad className="h-7 w-7 text-bronze" />,
+      description: "Rate & Earn",
     },
     {
       id: "thisthat",
       name: "This/That",
-      icon: <ArrowRight className="h-8 w-8 text-bronze" />,
-      description: "Quick choice, big impact! Pick winners in head-to-head battles",
+      icon: <ArrowRight className="h-7 w-7 text-bronze" />,
+      description: "Choose Winner",
     },
     {
       id: "bracket",
       name: "Bracket",
-      icon: <CircleDollarSign className="h-8 w-8 text-bronze" />,
-      description: "Tournament champion! Eliminate options to crown the best",
+      icon: <CircleDollarSign className="h-7 w-7 text-bronze" />,
+      description: "Tournament Mode",
     },
     {
       id: "higherlower",
       name: "Higher/Lower",
-      icon: <Thermometer className="h-8 w-8 text-bronze" />,
-      description: "Test your price wisdom! Guess values and rack up coins",
+      icon: <Thermometer className="h-7 w-7 text-bronze" />,
+      description: "Guess Values",
     },
     {
       id: "soundbyte",
       name: "Sound Byte",
-      icon: <Headphones className="h-8 w-8 text-bronze" />,
-      description: "Golden ears challenge! Rate audio that makes brands pop",
+      icon: <Headphones className="h-7 w-7 text-bronze" />,
+      description: "Rate Audio",
     },
     {
       id: "highlight",
       name: "Highlight",
-      icon: <Image className="h-8 w-8 text-bronze" />,
-      description: "Spot what shines! Mark the magic in ad campaigns",
+      icon: <Image className="h-7 w-7 text-bronze" />,
+      description: "Mark Magic",
     },
     {
       id: "adlibpro",
       name: "Ad Lib Pro",
-      icon: <MessageCircle className="h-8 w-8 text-bronze" />,
-      description: "Word wizard wanted! Craft catchy phrases that sell",
+      icon: <MessageCircle className="h-7 w-7 text-bronze" />,
+      description: "Write Copy",
     },
     {
       id: "logosort",
       name: "Logo Sort",
-      icon: <Grid className="h-8 w-8 text-bronze" />,
-      description: "Brand mastermind! Organize logos and earn instant cash",
+      icon: <Grid className="h-7 w-7 text-bronze" />,
+      description: "Organize Brands",
     }
   ];
 
@@ -123,12 +123,12 @@ const HomePage = () => {
                 hover:translate-y-[-2px] aspect-square"
               onClick={() => handleGameSelect(game.id)}
             >
-              <CardContent className="p-4 flex flex-col items-center text-center h-full justify-center">
-                <div className="rounded-full bg-gradient-to-br from-bronze/30 to-bronze/10 p-3 mb-3">
+              <CardContent className="p-5 flex flex-col items-center text-center h-full justify-center gap-2">
+                <div className="rounded-full bg-gradient-to-br from-bronze/30 to-bronze/10 p-2.5">
                   {game.icon}
                 </div>
-                <h3 className="font-medium text-lg text-white mb-1">{game.name}</h3>
-                <p className="text-xs text-gray-300 leading-tight">{game.description}</p>
+                <h3 className="font-semibold text-base text-white">{game.name}</h3>
+                <p className="text-xs text-gray-400">{game.description}</p>
                 <div className="absolute top-2 right-2">
                   <span className="inline-flex items-center justify-center w-5 h-5 bg-bronze rounded-full">
                     <span className="text-[10px] font-bold text-white">$</span>
