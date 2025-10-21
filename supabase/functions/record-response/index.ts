@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
       {
         global: {
           headers: { Authorization: req.headers.get('Authorization')! },
@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
     // Get current stats
     const { data: stats, error: statsError } = await supabaseClient
       .from('user_stats')
-      .select('balance, total_earned, tasks_completed')
+      .select('balance, total_earned, tasks_completed, earnings_today')
       .eq('user_id', user.id)
       .single()
 
@@ -88,6 +88,7 @@ Deno.serve(async (req) => {
     // Update user stats
     const newBalance = parseFloat(stats.balance) + parseFloat(reward_amount)
     const newTotalEarned = parseFloat(stats.total_earned) + parseFloat(reward_amount)
+    const newEarningsToday = parseFloat(stats.earnings_today) + parseFloat(reward_amount)
     const newTasksCompleted = stats.tasks_completed + 1
 
     const { error: updateError } = await supabaseClient
@@ -96,7 +97,7 @@ Deno.serve(async (req) => {
         balance: newBalance,
         total_earned: newTotalEarned,
         tasks_completed: newTasksCompleted,
-        earnings_today: supabaseClient.rpc('increment', { x: reward_amount }),
+        earnings_today: newEarningsToday,
         last_active: new Date().toISOString(),
       })
       .eq('user_id', user.id)

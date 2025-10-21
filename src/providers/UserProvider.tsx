@@ -91,6 +91,38 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Set up realtime listener for user_stats
+  useEffect(() => {
+    if (!authUser?.id) return;
+
+    const channel = supabase
+      .channel('user_stats_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'user_stats',
+          filter: `user_id=eq.${authUser.id}`
+        },
+        (payload) => {
+          const stats = payload.new as any;
+          setUser(prev => prev ? {
+            ...prev,
+            balance: Number(stats.balance) || 0,
+            completedTasks: stats.tasks_completed || 0,
+            earningsToday: Number(stats.earnings_today) || 0,
+            streak: stats.current_streak || 0,
+          } : null);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [authUser?.id]);
+
   const login = async (email: string, password: string): Promise<void> => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
