@@ -14,7 +14,162 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      game_responses: {
+        Row: {
+          completed_at: string
+          game_type: string
+          id: string
+          response_data: Json
+          reward_earned: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          game_type: string
+          id?: string
+          response_data: Json
+          reward_earned?: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          game_type?: string
+          id?: string
+          response_data?: Json
+          reward_earned?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_responses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          id: string
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          id: string
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          payment_method: string | null
+          status: Database["public"]["Enums"]["transaction_status"]
+          type: Database["public"]["Enums"]["transaction_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          payment_method?: string | null
+          status?: Database["public"]["Enums"]["transaction_status"]
+          type: Database["public"]["Enums"]["transaction_type"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          payment_method?: string | null
+          status?: Database["public"]["Enums"]["transaction_status"]
+          type?: Database["public"]["Enums"]["transaction_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_stats: {
+        Row: {
+          balance: number
+          created_at: string
+          current_streak: number
+          earnings_today: number
+          id: string
+          last_active: string
+          tasks_completed: number
+          total_earned: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          current_streak?: number
+          earnings_today?: number
+          id?: string
+          last_active?: string
+          tasks_completed?: number
+          total_earned?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          current_streak?: number
+          earnings_today?: number
+          id?: string
+          last_active?: string
+          tasks_completed?: number
+          total_earned?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_stats_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +178,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      transaction_status: "pending" | "completed" | "failed"
+      transaction_type:
+        | "earning"
+        | "cashout"
+        | "bank_transfer"
+        | "venmo"
+        | "investment"
+        | "donation"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +312,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      transaction_status: ["pending", "completed", "failed"],
+      transaction_type: [
+        "earning",
+        "cashout",
+        "bank_transfer",
+        "venmo",
+        "investment",
+        "donation",
+      ],
+    },
   },
 } as const

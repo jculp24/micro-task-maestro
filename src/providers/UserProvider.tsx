@@ -1,9 +1,10 @@
-
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { User, Session } from "@supabase/supabase-js";
 
 export interface UserProfile {
   id: string;
-  name: string;
+  username: string;
   email: string;
   balance: number;
   completedTasks: number;
@@ -15,44 +16,119 @@ interface UserContextType {
   user: UserProfile | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-  registerUser: (name: string, email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  registerUser: (username: string, email: string, password: string) => Promise<void>;
   updateBalance: (amount: number) => void;
   completeTask: (amount: number) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-// Mock user data for demonstration
-const DEMO_USER: UserProfile = {
-  id: "user123",
-  name: "Alex Johnson",
-  email: "alex@example.com",
-  balance: 12.46,
-  completedTasks: 47,
-  earningsToday: 1.28,
-  streak: 5,
-};
-
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<UserProfile | null>(DEMO_USER); // Start logged in for demo
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [authUser, setAuthUser] = useState<User | null>(null);
+
+  // Fetch user profile and stats
+  const fetchUserData = async (userId: string) => {
+    try {
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
+      if (profileError) throw profileError;
+
+      const { data: stats, error: statsError } = await supabase
+        .from("user_stats")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+
+      if (statsError) throw statsError;
+
+      setUser({
+        id: profile.id,
+        username: profile.username || profile.email.split('@')[0],
+        email: profile.email,
+        balance: Number(stats.balance) || 0,
+        completedTasks: stats.tasks_completed || 0,
+        earningsToday: Number(stats.earnings_today) || 0,
+        streak: stats.current_streak || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setAuthUser(session?.user ?? null);
+        
+        if (session?.user) {
+          setTimeout(() => {
+            fetchUserData(session.user.id);
+          }, 0);
+        } else {
+          setUser(null);
+        }
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setAuthUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserData(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const login = async (email: string, password: string): Promise<void> => {
-    // Mock login - would be replaced with real auth
-    setUser(DEMO_USER);
-  };
-
-  const logout = (): void => {
-    setUser(null);
-  };
-
-  const registerUser = async (name: string, email: string, password: string): Promise<void> => {
-    // Mock registration - would be replaced with real auth
-    setUser({
-      ...DEMO_USER,
-      name,
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
+      password,
     });
+
+    if (error) throw error;
+    if (data.user) {
+      await fetchUserData(data.user.id);
+    }
+  };
+
+  const logout = async (): Promise<void> => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    setUser(null);
+    setSession(null);
+    setAuthUser(null);
+  };
+
+  const registerUser = async (username: string, email: string, password: string): Promise<void> => {
+    const redirectUrl = `${window.location.origin}/`;
+    
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: redirectUrl,
+        data: {
+          username,
+        },
+      },
+    });
+
+    if (error) throw error;
+    if (data.user) {
+      await fetchUserData(data.user.id);
+    }
   };
 
   const updateBalance = (amount: number): void => {

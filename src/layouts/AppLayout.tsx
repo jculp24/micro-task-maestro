@@ -9,10 +9,10 @@ const AppLayout = () => {
   const { isAuthenticated } = useUser();
   const navigate = useNavigate();
 
-  // Redirect to onboarding if not authenticated
+  // Redirect to auth if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate("/onboarding");
+      navigate("/auth");
     }
   }, [isAuthenticated, navigate]);
 

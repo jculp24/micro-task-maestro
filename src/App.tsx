@@ -12,7 +12,7 @@ import HomePage from "@/pages/HomePage";
 import GamePage from "@/pages/GamePage";
 import WalletPage from "@/pages/WalletPage";
 import ProfilePage from "@/pages/ProfilePage";
-import OnboardingPage from "@/pages/OnboardingPage";
+import AuthPage from "@/pages/AuthPage";
 import NotFound from "@/pages/NotFound";
 
 // Layout
@@ -30,7 +30,7 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <Routes>
-                <Route path="/onboarding" element={<OnboardingPage />} />
+                <Route path="/auth" element={<AuthPage />} />
                 <Route path="/" element={<AppLayout />}>
                   <Route index element={<HomePage />} />
                   <Route path="game/:gameType" element={<GamePage />} />

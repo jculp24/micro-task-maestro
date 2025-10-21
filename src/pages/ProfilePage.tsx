@@ -27,9 +27,9 @@ const ProfilePage = () => {
   const { theme, toggleTheme } = useTheme();
   const [notifications, setNotifications] = useState(true);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (confirm("Are you sure you want to logout?")) {
-      logout();
+      await logout();
     }
   };
 
@@ -40,12 +40,12 @@ const ProfilePage = () => {
       <div className="flex items-center gap-4">
         <Avatar className="h-20 w-20 border-2 border-bronze">
           <AvatarFallback className="bg-bronze text-xl">
-            {user.name.substring(0, 2).toUpperCase()}
+            {user.username.substring(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
         
         <div>
-          <h2 className="text-2xl font-bold">{user.name}</h2>
+          <h2 className="text-2xl font-bold">{user.username}</h2>
           <p className="text-muted-foreground">{user.email}</p>
         </div>
       </div>
