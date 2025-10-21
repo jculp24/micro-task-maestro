@@ -49,6 +49,47 @@ export type Database = {
           },
         ]
       }
+      individual_responses: {
+        Row: {
+          action_type: string
+          created_at: string
+          game_session_id: string | null
+          game_type: string
+          id: string
+          response_data: Json
+          reward_earned: number
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          game_session_id?: string | null
+          game_type: string
+          id?: string
+          response_data: Json
+          reward_earned: number
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          game_session_id?: string | null
+          game_type?: string
+          id?: string
+          response_data?: Json
+          reward_earned?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "individual_responses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

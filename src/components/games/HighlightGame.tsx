@@ -3,6 +3,8 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface HighlightGameProps {
   data: any;
@@ -15,11 +17,12 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
   const [markers, setMarkers] = useState<Array<{ x: number, y: number, type: 'like' | 'dislike' }>>([]);
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const [selectedMarkerType, setSelectedMarkerType] = useState<'like' | 'dislike'>('like');
+  const { toast } = useToast();
   
   // Get current image
   const currentImage = images[currentIndex];
   
-  const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleImageClick = async (e: React.MouseEvent<HTMLDivElement>) => {
     if (!imageContainerRef.current) return;
     
     // Get click coordinates relative to the image container
@@ -29,6 +32,36 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
     
     // Add a new marker
     setMarkers([...markers, { x, y, type: selectedMarkerType }]);
+
+    // Record response immediately
+    try {
+      const { error } = await supabase.functions.invoke('record-response', {
+        body: {
+          game_type: 'highlight',
+          action_type: `place_marker_${selectedMarkerType}`,
+          response_data: { 
+            image_id: currentImage.id,
+            marker_type: selectedMarkerType,
+            position: { x, y }
+          },
+          reward_amount: data.rewardPerAction
+        }
+      });
+
+      if (error) throw error;
+
+      // Show earning feedback
+      toast({
+        title: `+$${data.rewardPerAction.toFixed(2)}`,
+        description: `Marker placed`,
+        duration: 1500,
+      });
+
+      // Report progress
+      onProgress();
+    } catch (error) {
+      console.error('Error recording response:', error);
+    }
   };
   
   const handleNext = () => {

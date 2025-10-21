@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/providers/UserProvider";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
@@ -59,25 +59,13 @@ const GamePage = () => {
     setProgress(newProgress);
   };
 
-  // Finish button handler - user decides when to complete
+  // Exit game handler
   const handleFinishGame = () => {
-    if (progress > 0) {
-      setIsGameCompleted(true);
-      setTimeout(() => {
-        completeTask(reward);
-        navigate("/");
-        toast({
-          title: "Task completed!",
-          description: `You earned $${reward.toFixed(2)}.`
-        });
-      }, 500);
-    } else {
-      toast({
-        title: "Can't complete yet",
-        description: "Please provide at least one response first.",
-        variant: "destructive"
-      });
-    }
+    navigate("/");
+    toast({
+      title: "Game completed!",
+      description: `You provided ${progress} responses.`
+    });
   };
   const handleExitGame = () => {
     if (progress > 0 && !isGameCompleted) {
@@ -128,14 +116,13 @@ const GamePage = () => {
           {renderGame()}
         </div>
 
-        {/* Finish button to let user decide when to stop */}
+        {/* Exit button */}
         <Button 
           onClick={handleFinishGame} 
           variant="outline" 
           className="mt-4 w-full border-bronze text-bronze hover:bg-bronze hover:text-white"
-          disabled={progress === 0}
         >
-          Finish & Collect ${reward.toFixed(2)}
+          {progress > 0 ? `Exit Game (${progress} responses)` : "Exit Game"}
         </Button>
       </>
     </div>;

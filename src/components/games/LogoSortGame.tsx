@@ -4,6 +4,8 @@ import { Check } from 'lucide-react';
 import LogoItem from './logo-sort/LogoItem';
 import CartoonBin from './logo-sort/CartoonBin';
 import { Button } from '@/components/ui/button';
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface LogoSortProps {
   data: any;
@@ -28,6 +30,7 @@ const LogoSortGame = ({ data, onProgress }: LogoSortProps) => {
   const [timer, setTimer] = useState<number>(20);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(true);
   const [activeDragLogo, setActiveDragLogo] = useState<string | null>(null);
+  const { toast } = useToast();
   
   // References to bin elements for collision detection
   const binRefs = useRef<Map<string, HTMLElement>>(new Map());
@@ -91,18 +94,56 @@ const LogoSortGame = ({ data, onProgress }: LogoSortProps) => {
   };
 
   // Handle logo drop into bin
-  const handleDrop = (logoId: string, binId: string) => {
+  const handleDrop = async (logoId: string, binId: string) => {
     // Play haptic feedback simulation (we'll use visual feedback for now)
     setSortedLogos((prev) => ({
       ...prev,
       [logoId]: binId,
     }));
+
+    // Record response immediately
+    try {
+      const logo = logos.find(l => l.id === logoId);
+      const bin = bins.find(b => b.id === binId);
+      
+      const { error } = await supabase.functions.invoke('record-response', {
+        body: {
+          game_type: 'logosort',
+          action_type: 'sort_logo',
+          response_data: { 
+            logo_id: logoId,
+            logo_name: logo?.name,
+            bin_id: binId,
+            bin_label: bin?.label
+          },
+          reward_amount: data.rewardPerAction
+        }
+      });
+
+      if (error) throw error;
+
+      // Show earning feedback
+      toast({
+        title: `+$${data.rewardPerAction.toFixed(2)}`,
+        description: `Sorted ${logo?.name}`,
+        duration: 1500,
+      });
+
+      // Report progress
+      onProgress();
+    } catch (error) {
+      console.error('Error recording response:', error);
+    }
   };
 
-  // Submit results
+  // Submit results (no additional payment needed since each sort already paid)
   const handleSubmit = () => {
-    // Call onProgress to update game state and trigger reward
-    onProgress();
+    // Just navigate away - no additional payment
+    toast({
+      title: "Game completed!",
+      description: `You sorted ${sortedCount} logos`,
+      duration: 2000,
+    });
   };
 
   return (

@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Play, Pause, ThumbsUp, ThumbsDown } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface SoundByteGameProps {
   data: any;
@@ -15,6 +17,7 @@ const SoundByteGame = ({ data, onProgress }: SoundByteGameProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
   const [waveformLevel, setWaveformLevel] = useState(0);
+  const { toast } = useToast();
   
   // Get current audio clip
   const currentClip = audioClips[currentIndex];
@@ -40,8 +43,38 @@ const SoundByteGame = ({ data, onProgress }: SoundByteGameProps) => {
     }
   };
   
-  const handleVote = (liked: boolean) => {
+  const handleVote = async (liked: boolean) => {
     setHasVoted(true);
+
+    // Record response immediately
+    try {
+      const { error } = await supabase.functions.invoke('record-response', {
+        body: {
+          game_type: 'soundbyte',
+          action_type: liked ? 'vote_like' : 'vote_dislike',
+          response_data: { 
+            clip_id: currentClip.id,
+            clip_title: currentClip.title,
+            liked
+          },
+          reward_amount: data.rewardPerAction
+        }
+      });
+
+      if (error) throw error;
+
+      // Show earning feedback
+      toast({
+        title: `+$${data.rewardPerAction.toFixed(2)}`,
+        description: `Earned for rating ${currentClip.title}`,
+        duration: 2000,
+      });
+
+      // Report progress
+      onProgress();
+    } catch (error) {
+      console.error('Error recording response:', error);
+    }
     
     // Move to next clip after a short delay
     setTimeout(() => {
@@ -49,9 +82,6 @@ const SoundByteGame = ({ data, onProgress }: SoundByteGameProps) => {
         setCurrentIndex(currentIndex + 1);
         setHasVoted(false);
       }
-      
-      // Report progress
-      onProgress();
     }, 500);
   };
   

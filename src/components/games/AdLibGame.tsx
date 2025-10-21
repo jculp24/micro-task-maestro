@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Mic, MicOff, Send, Volume2, ArrowRight } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AdLibGameProps {
   data: any;
@@ -175,7 +176,7 @@ const AdLibGame = ({ data, onProgress }: AdLibGameProps) => {
   };
   
   // Handle submission of the entire template
-  const handleCompleteTemplate = (finalResponses: string[]) => {
+  const handleCompleteTemplate = async (finalResponses: string[]) => {
     if (inputMethod === "text") {
       const wordCount = calculateWordCount(finalResponses);
       if (wordCount < 10) {
@@ -196,16 +197,40 @@ const AdLibGame = ({ data, onProgress }: AdLibGameProps) => {
       });
       return;
     }
-    
-    // Show success and move to the next template or complete
-    const payout = calculatePayout(finalResponses);
-    toast({
-      title: "Response submitted!",
-      description: `Great pitch! You earned $${payout.toFixed(2)}`
-    });
+
+    // Record response immediately
+    try {
+      const { error } = await supabase.functions.invoke('record-response', {
+        body: {
+          game_type: 'adlibpro',
+          action_type: 'complete_template',
+          response_data: { 
+            template_id: currentTemplate.id,
+            responses: finalResponses,
+            input_method: inputMethod,
+            word_count: inputMethod === "text" ? calculateWordCount(finalResponses) : undefined,
+            recording_time: inputMethod === "voice" ? recordingTime : undefined
+          },
+          reward_amount: data.rewardPerAction
+        }
+      });
+
+      if (error) throw error;
+
+      // Show earning feedback
+      toast({
+        title: `+$${data.rewardPerAction.toFixed(2)}`,
+        description: `Great pitch! Template completed`,
+        duration: 2000,
+      });
+
+      // Report progress
+      onProgress();
+    } catch (error) {
+      console.error('Error recording response:', error);
+    }
     
     // Move to next template or complete
-    onProgress();
     if (currentIndex < templates.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {

@@ -3,7 +3,7 @@ export const mockGameData = {
     title: "Rate these sneaker designs",
     description: "Swipe right for designs you like, left for those you don't",
     steps: 5,
-    reward: 0.25,
+    rewardPerAction: 0.05,
     items: [
       {
         id: "s1",
@@ -42,7 +42,7 @@ export const mockGameData = {
     title: "Best travel destinations",
     description: "Help us rank these popular vacation spots",
     steps: 3,
-    reward: 0.50,
+    rewardPerAction: 0.04,
     items: [
       {
         id: "b1",
@@ -75,7 +75,7 @@ export const mockGameData = {
     title: "Compare food packaging designs",
     description: "Which packaging would make you more likely to purchase?",
     steps: 4,
-    reward: 0.15,
+    rewardPerAction: 0.04,
     comparisons: [
       {
         id: "tt1",
@@ -132,7 +132,7 @@ export const mockGameData = {
     title: "Rate audio jingles",
     description: "Help us choose our new brand sound",
     steps: 3,
-    reward: 0.20,
+    rewardPerAction: 0.03,
     audioClips: [
       {
         id: "sb1",
@@ -159,7 +159,7 @@ export const mockGameData = {
     title: "Guess smartphone prices",
     description: "Test your knowledge of current market prices",
     steps: 4,
-    reward: 0.30,
+    rewardPerAction: 0.04,
     products: [
       {
         id: "hl1",
@@ -200,7 +200,7 @@ export const mockGameData = {
     title: "Highlight what you like about this ad",
     description: "Give feedback on our new campaign",
     steps: 3,
-    reward: 0.35,
+    rewardPerAction: 0.02,
     images: [
       {
         id: "h1",
@@ -224,7 +224,7 @@ export const mockGameData = {
     title: "Ad Lib: Pitch your thoughts",
     description: "Fill in the blanks to create a compelling ad message",
     steps: 3,
-    reward: 1.25,
+    rewardPerAction: 0.05,
     templates: [
       {
         id: "adlib1",
@@ -257,7 +257,7 @@ export const mockGameData = {
     title: "Sort Streaming Services",
     description: "Drag and drop streaming service logos into the categories that best describe your preference",
     steps: 15,
-    reward: 0.15,
+    rewardPerAction: 0.01,
     bins: [
       { id: "bin1", label: "Subscribe" },
       { id: "bin2", label: "Don't Use" }

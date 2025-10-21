@@ -1,6 +1,8 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface BracketGameProps {
   data: any;
@@ -9,6 +11,7 @@ interface BracketGameProps {
 
 const BracketGame = ({ data, onProgress }: BracketGameProps) => {
   const initialItems = data?.items || [];
+  const { toast } = useToast();
   
   // Create initial bracket structure
   const [rounds, setRounds] = useState<any[][]>([]);
@@ -24,7 +27,38 @@ const BracketGame = ({ data, onProgress }: BracketGameProps) => {
     }
   }, [initialItems]);
   
-  const handleSelectWinner = (item: any) => {
+  const handleSelectWinner = async (item: any) => {
+    // Record response immediately
+    try {
+      const { error } = await supabase.functions.invoke('record-response', {
+        body: {
+          game_type: 'bracket',
+          action_type: 'select_winner',
+          response_data: { 
+            winner_id: item.id,
+            winner_title: item.title,
+            round: currentRound + 1,
+            match: currentMatch + 1
+          },
+          reward_amount: data.rewardPerAction
+        }
+      });
+
+      if (error) throw error;
+
+      // Show earning feedback
+      toast({
+        title: `+$${data.rewardPerAction.toFixed(2)}`,
+        description: `Earned for selecting ${item.title}`,
+        duration: 2000,
+      });
+
+      // Report progress
+      onProgress();
+    } catch (error) {
+      console.error('Error recording response:', error);
+    }
+    
     // Add the winner to the next round
     const nextRound = rounds[currentRound + 1] || [];
     const updatedNextRound = [...nextRound, item];
@@ -47,9 +81,6 @@ const BracketGame = ({ data, onProgress }: BracketGameProps) => {
         setWinner(item);
       }
     }
-    
-    // Report progress
-    onProgress();
   };
   
   // If no items, show a placeholder

@@ -1,6 +1,8 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface ThisThatGameProps {
   data: any;
@@ -11,20 +13,50 @@ const ThisThatGame = ({ data, onProgress }: ThisThatGameProps) => {
   const comparisons = data?.comparisons || [];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedSide, setSelectedSide] = useState<'left' | 'right' | null>(null);
+  const { toast } = useToast();
   
   // Get current comparison
   const currentComparison = comparisons[currentIndex % comparisons.length]; // Use modulo to cycle through items
   
-  const handleSelect = (side: 'left' | 'right') => {
+  const handleSelect = async (side: 'left' | 'right') => {
     setSelectedSide(side);
+
+    // Record response immediately
+    try {
+      const selectedOption = side === 'left' ? currentComparison.left : currentComparison.right;
+      const { error } = await supabase.functions.invoke('record-response', {
+        body: {
+          game_type: 'thisthat',
+          action_type: `select_${side}`,
+          response_data: { 
+            comparison_id: currentComparison.id,
+            question: currentComparison.question,
+            selected_side: side,
+            selected_title: selectedOption.title
+          },
+          reward_amount: data.rewardPerAction
+        }
+      });
+
+      if (error) throw error;
+
+      // Show earning feedback
+      toast({
+        title: `+$${data.rewardPerAction.toFixed(2)}`,
+        description: `Selected ${selectedOption.title}`,
+        duration: 2000,
+      });
+
+      // Report progress
+      onProgress();
+    } catch (error) {
+      console.error('Error recording response:', error);
+    }
     
     setTimeout(() => {
       // Move to the next comparison (cycling through available comparisons)
       setCurrentIndex(currentIndex + 1);
       setSelectedSide(null);
-      
-      // Report progress
-      onProgress();
     }, 500);
   };
   

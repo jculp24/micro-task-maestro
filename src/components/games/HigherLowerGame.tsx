@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ArrowUp, ArrowDown } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface HigherLowerGameProps {
   data: any;
@@ -15,11 +17,12 @@ const HigherLowerGame = ({ data, onProgress }: HigherLowerGameProps) => {
   const [showActualPrice, setShowActualPrice] = useState(false);
   const [selectedGuess, setSelectedGuess] = useState<'higher' | 'lower' | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const { toast } = useToast();
   
   // Get current product
   const currentProduct = products[currentIndex];
   
-  const handleGuess = (guess: 'higher' | 'lower') => {
+  const handleGuess = async (guess: 'higher' | 'lower') => {
     setSelectedGuess(guess);
     
     // Check if guess is correct
@@ -34,6 +37,39 @@ const HigherLowerGame = ({ data, onProgress }: HigherLowerGameProps) => {
     
     // Show the actual price
     setShowActualPrice(true);
+
+    // Record response immediately
+    try {
+      const { error } = await supabase.functions.invoke('record-response', {
+        body: {
+          game_type: 'higherlower',
+          action_type: `guess_${guess}`,
+          response_data: { 
+            product_id: currentProduct.id,
+            product_name: currentProduct.name,
+            guess,
+            correct: isGuessCorrect,
+            display_price: displayPrice,
+            actual_price: actualPrice
+          },
+          reward_amount: data.rewardPerAction
+        }
+      });
+
+      if (error) throw error;
+
+      // Show earning feedback
+      toast({
+        title: `+$${data.rewardPerAction.toFixed(2)}`,
+        description: isGuessCorrect ? 'Correct guess!' : 'Nice try!',
+        duration: 2000,
+      });
+
+      // Report progress
+      onProgress();
+    } catch (error) {
+      console.error('Error recording response:', error);
+    }
     
     // Move to next product after a delay
     setTimeout(() => {
@@ -43,9 +79,6 @@ const HigherLowerGame = ({ data, onProgress }: HigherLowerGameProps) => {
         setShowActualPrice(false);
         setIsCorrect(null);
       }
-      
-      // Report progress
-      onProgress();
     }, 2000);
   };
   

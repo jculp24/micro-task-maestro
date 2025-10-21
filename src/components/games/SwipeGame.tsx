@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { motion, PanInfo, useMotionValue, useTransform } from "framer-motion";
 import { Check, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface SwipeGameProps {
   data: any;
@@ -12,6 +14,7 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
   const items = data?.items || [];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<"left" | "right" | null>(null);
+  const { toast } = useToast();
 
   // Get the current item
   const currentItem = items[currentIndex % items.length]; // Use modulo to cycle through items
@@ -32,8 +35,38 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
     }
   };
 
-  const handleSwipe = (dir: "left" | "right") => {
+  const handleSwipe = async (dir: "left" | "right") => {
     setDirection(dir);
+    
+    // Record response immediately
+    try {
+      const { data: responseData, error } = await supabase.functions.invoke('record-response', {
+        body: {
+          game_type: 'swipe',
+          action_type: `swipe_${dir}`,
+          response_data: { 
+            item_id: currentItem.id,
+            item_title: currentItem.title,
+            direction: dir 
+          },
+          reward_amount: data.rewardPerAction
+        }
+      });
+
+      if (error) throw error;
+
+      // Show earning feedback
+      toast({
+        title: `+$${data.rewardPerAction.toFixed(2)}`,
+        description: `Earned for rating ${currentItem.title}`,
+        duration: 2000,
+      });
+
+      // Report progress
+      onProgress();
+    } catch (error) {
+      console.error('Error recording response:', error);
+    }
     
     setTimeout(() => {
       // Reset direction and advance to next card
@@ -41,9 +74,6 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
       
       // Move to next item (cycling through available items)
       setCurrentIndex(currentIndex + 1);
-      
-      // Report progress each time
-      onProgress();
       
       // Reset motion values
       x.set(0);
