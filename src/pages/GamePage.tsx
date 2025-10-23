@@ -112,7 +112,7 @@ const GamePage = () => {
         
         <GameProgress current={progress} total={-1} />
         
-        <div className="flex-1 game-container mt-4">
+        <div className="flex-1 game-container mt-4 pb-6 min-h-0 overflow-y-auto">
           {renderGame()}
         </div>
 
@@ -120,7 +120,7 @@ const GamePage = () => {
         <Button 
           onClick={handleFinishGame} 
           variant="outline" 
-          className="mt-4 w-full border-bronze text-bronze hover:bg-bronze hover:text-white"
+          className="mt-6 mb-4 w-full border-bronze text-bronze hover:bg-bronze hover:text-white shrink-0"
         >
           {progress > 0 ? `Exit Game (${progress} responses)` : "Exit Game"}
         </Button>
