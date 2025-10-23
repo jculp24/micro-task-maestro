@@ -129,12 +129,30 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
         className="absolute w-full max-w-[280px] bg-card shadow-xl rounded-xl cursor-grab active:cursor-grabbing"
       >
-        <div className="aspect-[3/4] w-full overflow-hidden rounded-t-xl">
+        <div className="relative aspect-[3/4] w-full overflow-hidden rounded-t-xl">
           <img 
             src={currentItem.image} 
             alt={currentItem.title}
             className="w-full h-full object-cover"
           />
+          <div className="absolute inset-x-0 bottom-2 flex justify-between px-4">
+            <button 
+              onClick={() => handleSwipe("left")} 
+              className="w-14 h-14 rounded-full bg-red-100 text-red-500 flex items-center justify-center
+                         hover:bg-red-200 transition-colors dark:bg-red-900/30 dark:text-red-400"
+              aria-label="Dislike"
+            >
+              <X size={28} />
+            </button>
+            <button 
+              onClick={() => handleSwipe("right")} 
+              className="w-14 h-14 rounded-full bg-green-100 text-green-500 flex items-center justify-center
+                         hover:bg-green-200 transition-colors dark:bg-green-900/30 dark:text-green-400"
+              aria-label="Like"
+            >
+              <Check size={28} />
+            </button>
+          </div>
         </div>
         
         <div className="p-3">
@@ -145,24 +163,7 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
         </div>
       </motion.div>
       
-      {/* Button controls */}
-      <div className="absolute bottom-2 flex gap-8 z-10">
-        <button 
-          onClick={() => handleSwipe("left")} 
-          className="w-14 h-14 rounded-full bg-red-100 text-red-500 flex items-center justify-center
-                     hover:bg-red-200 transition-colors dark:bg-red-900/30 dark:text-red-400"
-        >
-          <X size={28} />
-        </button>
-        
-        <button 
-          onClick={() => handleSwipe("right")} 
-          className="w-14 h-14 rounded-full bg-green-100 text-green-500 flex items-center justify-center
-                     hover:bg-green-200 transition-colors dark:bg-green-900/30 dark:text-green-400"
-        >
-          <Check size={28} />
-        </button>
-      </div>
+      {/* Button controls moved inside image area */}
     </div>
   );
 };
