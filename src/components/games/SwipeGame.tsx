@@ -82,16 +82,16 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
 
   if (!currentItem) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-[480px]">
         <p className="text-muted-foreground">No items to display</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[400px] py-6 relative">
+    <div className="flex flex-col items-center justify-center min-h-[480px] pt-2 pb-2 relative">
       {/* Indicators */}
-      <div className="flex gap-20 absolute top-2 w-full justify-center">
+      <div className="flex gap-20 absolute top-0 w-full justify-center">
         <motion.div 
           style={{ opacity: leftOpacity }}
           className="flex items-center gap-2 text-red-500 font-medium"
@@ -110,7 +110,7 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
       </div>
       
       {/* Item count */}
-      <div className="absolute top-12 text-sm text-muted-foreground">
+      <div className="absolute top-8 text-sm text-muted-foreground">
         Card #{(currentIndex % items.length) + 1} of {items.length}
       </div>
       
@@ -137,7 +137,7 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
           />
         </div>
         
-        <div className="p-4">
+        <div className="p-3">
           <h3 className="font-semibold">{currentItem.title}</h3>
           <p className="text-sm text-muted-foreground mt-1">
             {currentItem.description}
@@ -146,7 +146,7 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
       </motion.div>
       
       {/* Button controls */}
-      <div className="absolute bottom-8 flex gap-8 z-10">
+      <div className="absolute bottom-2 flex gap-8 z-10">
         <button 
           onClick={() => handleSwipe("left")} 
           className="w-14 h-14 rounded-full bg-red-100 text-red-500 flex items-center justify-center

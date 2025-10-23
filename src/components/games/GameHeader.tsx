@@ -32,13 +32,13 @@ const GameHeader = ({
         return type;
     }
   };
-  return <div className="mb-4">
-      <div className="flex items-center gap-2 mb-1">
+  return <div className="mb-2">
+      <div className="flex items-center gap-1.5 mb-1">
         <span className="text-sm font-medium px-2 py-0.5 bg-bronze/10 text-bronze rounded-full">
           {getGameTypeDisplay(gameType)}
         </span>
       </div>
-      <h1 className="text-xl font-bold mb-1">{title}</h1>
+      <h1 className="text-xl font-bold mb-0.5">{title}</h1>
       <p className="text-sm text-muted-foreground">{description}</p>
     </div>;
 };
