@@ -4,7 +4,7 @@ import { motion, PanInfo, useMotionValue, useTransform } from "framer-motion";
 import { Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-
+import { useUser } from "@/providers/UserProvider";
 interface SwipeGameProps {
   data: any;
   onProgress: () => void;
@@ -15,6 +15,7 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<"left" | "right" | null>(null);
   const { toast } = useToast();
+  const { updateBalance } = useUser();
 
   // Get the current item
   const currentItem = items[currentIndex % items.length]; // Use modulo to cycle through items
@@ -61,6 +62,9 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
         description: `Earned for rating ${currentItem.title}`,
         duration: 2000,
       });
+
+      // Update local balance immediately
+      updateBalance(data.rewardPerAction);
 
       // Report progress
       onProgress();
