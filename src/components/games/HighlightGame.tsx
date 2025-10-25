@@ -1,48 +1,169 @@
-
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ThumbsUp, ThumbsDown } from "lucide-react";
+import { ThumbsUp, ThumbsDown, Undo, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@/providers/UserProvider";
+import { Canvas as FabricCanvas, Polygon as FabricPolygon, Circle as FabricCircle, Line as FabricLine } from "fabric";
 
 interface HighlightGameProps {
   data: any;
   onProgress: () => void;
 }
 
+interface Point {
+  x: number;
+  y: number;
+}
+
+interface PolygonData {
+  points: Point[];
+  type: 'like' | 'dislike';
+  timestamp: number;
+}
+
 const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
   const images = data?.images || [];
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [markers, setMarkers] = useState<Array<{ x: number, y: number, type: 'like' | 'dislike' }>>([]);
-  const imageContainerRef = useRef<HTMLDivElement>(null);
+  const [polygons, setPolygons] = useState<PolygonData[]>([]);
+  const [currentPoints, setCurrentPoints] = useState<Point[]>([]);
   const [selectedMarkerType, setSelectedMarkerType] = useState<'like' | 'dislike'>('like');
+  const [canvas, setCanvas] = useState<FabricCanvas | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { updateBalance } = useUser();
   
-  // Get current image
   const currentImage = images[currentIndex];
-  
-  const handleImageClick = async (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!imageContainerRef.current) return;
-    
-    // Get click coordinates relative to the image container
-    const rect = imageContainerRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    
-    // Add a new marker
-    setMarkers([...markers, { x, y, type: selectedMarkerType }]);
 
-    // Record response immediately
+  // Initialize canvas
+  useEffect(() => {
+    if (!canvasRef.current || !imageRef.current || !containerRef.current) return;
+
+    const img = imageRef.current;
+    const container = containerRef.current;
+
+    // Wait for image to load
+    const initCanvas = () => {
+      const fabricCanvas = new FabricCanvas(canvasRef.current!, {
+        width: img.offsetWidth,
+        height: img.offsetHeight,
+        selection: false,
+      });
+
+      setCanvas(fabricCanvas);
+    };
+
+    if (img.complete) {
+      initCanvas();
+    } else {
+      img.onload = initCanvas;
+    }
+
+    return () => {
+      if (canvas) {
+        canvas.dispose();
+      }
+    };
+  }, [currentImage]);
+
+  // Handle canvas click to add points
+  const handleCanvasClick = (e: any) => {
+    if (!canvas) return;
+
+    const pointer = canvas.getScenePoint(e.e);
+    const newPoint = { x: pointer.x, y: pointer.y };
+
+    // Add point marker
+    const circle = new FabricCircle({
+      left: newPoint.x,
+      top: newPoint.y,
+      radius: 4,
+      fill: selectedMarkerType === 'like' ? '#22c55e' : '#ef4444',
+      originX: 'center',
+      originY: 'center',
+      selectable: false,
+      hoverCursor: 'default',
+    });
+    canvas.add(circle);
+
+    // Draw line from previous point
+    if (currentPoints.length > 0) {
+      const prevPoint = currentPoints[currentPoints.length - 1];
+      const line = new FabricLine([prevPoint.x, prevPoint.y, newPoint.x, newPoint.y], {
+        stroke: selectedMarkerType === 'like' ? '#22c55e' : '#ef4444',
+        strokeWidth: 2,
+        selectable: false,
+        hoverCursor: 'default',
+      });
+      canvas.add(line);
+    }
+
+    setCurrentPoints([...currentPoints, newPoint]);
+  };
+
+  // Complete polygon on double click
+  const handleCanvasDoubleClick = () => {
+    if (currentPoints.length < 3) {
+      toast({
+        title: "Need more points",
+        description: "Draw at least 3 points to create a polygon",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    completePolygon();
+  };
+
+  const completePolygon = async () => {
+    if (!canvas || currentPoints.length < 3) return;
+
+    // Normalize points to percentages
+    const normalizedPoints = currentPoints.map(p => ({
+      x: (p.x / canvas.width!) * 100,
+      y: (p.y / canvas.height!) * 100,
+    }));
+
+    // Create final polygon
+    const polygon = new FabricPolygon(currentPoints, {
+      fill: selectedMarkerType === 'like' ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)',
+      stroke: selectedMarkerType === 'like' ? '#22c55e' : '#ef4444',
+      strokeWidth: 2,
+      selectable: false,
+      hoverCursor: 'default',
+    });
+
+    // Clear temporary markers
+    canvas.getObjects().forEach(obj => {
+      if (obj instanceof FabricCircle || obj instanceof FabricLine) {
+        canvas.remove(obj);
+      }
+    });
+
+    // Add final polygon
+    canvas.add(polygon);
+
+    const newPolygon: PolygonData = {
+      points: normalizedPoints,
+      type: selectedMarkerType,
+      timestamp: Date.now(),
+    };
+
+    setPolygons([...polygons, newPolygon]);
+    setCurrentPoints([]);
+
+    // Record response immediately for this polygon
     try {
       const { error } = await supabase.functions.invoke('record-response', {
         body: {
           game_type: 'highlight',
-          action_type: `place_marker_${selectedMarkerType}`,
+          action_type: `draw_polygon_${selectedMarkerType}`,
           response_data: { 
             image_id: currentImage.id,
-            marker_type: selectedMarkerType,
-            position: { x, y }
+            polygon: newPolygon
           },
           reward_amount: data.rewardPerAction
         }
@@ -53,9 +174,12 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
       // Show earning feedback
       toast({
         title: `+$${data.rewardPerAction.toFixed(2)}`,
-        description: `Marker placed`,
+        description: `Polygon drawn`,
         duration: 1500,
       });
+
+      // Update balance
+      updateBalance(data.rewardPerAction);
 
       // Report progress
       onProgress();
@@ -63,20 +187,61 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
       console.error('Error recording response:', error);
     }
   };
-  
+
+  const handleUndo = () => {
+    if (!canvas) return;
+
+    if (currentPoints.length > 0) {
+      // Remove last point and its line
+      const objects = canvas.getObjects();
+      const toRemove = objects.slice(-2); // Last circle and line
+      toRemove.forEach(obj => canvas.remove(obj));
+      setCurrentPoints(currentPoints.slice(0, -1));
+    } else if (polygons.length > 0) {
+      // Remove last completed polygon
+      const objects = canvas.getObjects();
+      const lastPolygon = objects[objects.length - 1];
+      if (lastPolygon instanceof FabricPolygon) {
+        canvas.remove(lastPolygon);
+        setPolygons(polygons.slice(0, -1));
+      }
+    }
+  };
+
+  const handleClear = () => {
+    if (!canvas) return;
+    canvas.getObjects().forEach(obj => canvas.remove(obj));
+    setPolygons([]);
+    setCurrentPoints([]);
+  };
+
   const handleNext = () => {
-    // Clear markers for the next image
-    setMarkers([]);
+    // Clear for next image
+    if (canvas) {
+      canvas.getObjects().forEach(obj => canvas.remove(obj));
+    }
+    setPolygons([]);
+    setCurrentPoints([]);
     
-    // Move to the next image or finish
     if (currentIndex < images.length - 1) {
       setCurrentIndex(currentIndex + 1);
     }
     
-    // Report progress
     onProgress();
   };
-  
+
+  useEffect(() => {
+    if (!canvas) return;
+
+    canvas.on('mouse:down', handleCanvasClick);
+    canvas.on('mouse:dblclick', handleCanvasDoubleClick);
+
+    return () => {
+      canvas.off('mouse:down', handleCanvasClick);
+      canvas.off('mouse:dblclick', handleCanvasDoubleClick);
+    };
+  }, [canvas, currentPoints, selectedMarkerType, polygons]);
+
   if (!currentImage) {
     return (
       <div className="flex items-center justify-center h-60">
@@ -90,7 +255,7 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
       <div className="text-center mb-4">
         <p className="text-lg font-medium">{currentImage.prompt}</p>
         <p className="text-sm text-muted-foreground">
-          Tap on the image to place markers for what you like or dislike
+          Draw polygons on areas you like (green) or dislike (red). Double-click to complete each shape.
         </p>
       </div>
       
@@ -99,7 +264,7 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
         <Button
           variant="ghost"
           className={`px-4 rounded-full ${selectedMarkerType === 'like' 
-            ? 'bg-white dark:bg-secondary text-bronze' 
+            ? 'bg-background text-foreground' 
             : 'text-muted-foreground'}`}
           onClick={() => setSelectedMarkerType('like')}
         >
@@ -109,7 +274,7 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
         <Button
           variant="ghost"
           className={`px-4 rounded-full ${selectedMarkerType === 'dislike' 
-            ? 'bg-white dark:bg-secondary text-bronze' 
+            ? 'bg-background text-foreground' 
             : 'text-muted-foreground'}`}
           onClick={() => setSelectedMarkerType('dislike')}
         >
@@ -117,50 +282,62 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
           Dislike
         </Button>
       </div>
+
+      {/* Drawing controls */}
+      <div className="flex gap-2 mb-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleUndo}
+          disabled={polygons.length === 0 && currentPoints.length === 0}
+        >
+          <Undo className="h-4 w-4 mr-2" />
+          Undo
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleClear}
+          disabled={polygons.length === 0 && currentPoints.length === 0}
+        >
+          <Trash2 className="h-4 w-4 mr-2" />
+          Clear All
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={completePolygon}
+          disabled={currentPoints.length < 3}
+        >
+          Complete Shape
+        </Button>
+      </div>
       
-      {/* Image container */}
+      {/* Image with canvas overlay */}
       <div 
-        ref={imageContainerRef}
-        onClick={handleImageClick}
-        className="w-full relative rounded-lg overflow-hidden border border-border mb-4 cursor-crosshair"
+        ref={containerRef}
+        className="w-full relative rounded-lg overflow-hidden border border-border mb-4"
       >
         <img 
+          ref={imageRef}
           src={currentImage.image} 
           alt="Highlight this"
           className="w-full object-contain"
         />
-        
-        {/* Render markers */}
-        {markers.map((marker, index) => (
-          <motion.div
-            key={index}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className={`absolute w-6 h-6 rounded-full flex items-center justify-center -ml-3 -mt-3
-                       ${marker.type === 'like' 
-                         ? 'bg-green-500 text-white' 
-                         : 'bg-red-500 text-white'}`}
-            style={{
-              left: `${marker.x}%`,
-              top: `${marker.y}%`,
-            }}
-          >
-            {marker.type === 'like' ? (
-              <ThumbsUp className="h-3 w-3" />
-            ) : (
-              <ThumbsDown className="h-3 w-3" />
-            )}
-          </motion.div>
-        ))}
+        <canvas 
+          ref={canvasRef}
+          className="absolute inset-0 cursor-crosshair"
+        />
       </div>
       
       <div className="flex justify-between w-full">
         <div className="text-sm text-muted-foreground">
-          {markers.length} markers placed
+          {polygons.length} polygon{polygons.length !== 1 ? 's' : ''} drawn
+          {currentPoints.length > 0 && ` (${currentPoints.length} points in progress)`}
         </div>
         <Button 
           onClick={handleNext}
-          className="bg-bronze text-white hover:bg-bronze-dark"
+          className="bg-primary text-primary-foreground hover:bg-primary/90"
         >
           {currentIndex < images.length - 1 ? "Next Image" : "Finish"}
         </Button>

@@ -49,6 +49,36 @@ export type Database = {
           },
         ]
       }
+      highlight_images: {
+        Row: {
+          campaign_name: string | null
+          created_at: string
+          id: string
+          image_url: string
+          prompt: string
+          status: string
+          uploader_id: string
+        }
+        Insert: {
+          campaign_name?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          prompt: string
+          status?: string
+          uploader_id: string
+        }
+        Update: {
+          campaign_name?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          prompt?: string
+          status?: string
+          uploader_id?: string
+        }
+        Relationships: []
+      }
       individual_responses: {
         Row: {
           action_type: string

@@ -14,6 +14,7 @@ import WalletPage from "@/pages/WalletPage";
 import ProfilePage from "@/pages/ProfilePage";
 import AuthPage from "@/pages/AuthPage";
 import NotFound from "@/pages/NotFound";
+import HighlightResultsPage from "@/pages/HighlightResultsPage";
 
 // Layout
 import AppLayout from "@/layouts/AppLayout";
@@ -36,6 +37,7 @@ const App = () => {
                   <Route path="game/:gameType" element={<GamePage />} />
                   <Route path="wallet" element={<WalletPage />} />
                   <Route path="profile" element={<ProfilePage />} />
+                  <Route path="results/highlight/:imageId" element={<HighlightResultsPage />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
