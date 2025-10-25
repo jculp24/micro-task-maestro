@@ -27,45 +27,28 @@ const LogoSortGame = ({ data, onProgress }: LogoSortProps) => {
   const [logos, setLogos] = useState<Logo[]>(data?.logos || []);
   const [bins, setBins] = useState<Bin[]>(data?.bins || []);
   const [sortedLogos, setSortedLogos] = useState<Record<string, string>>({});
-  const [timer, setTimer] = useState<number>(20);
-  const [isTimerRunning, setIsTimerRunning] = useState<boolean>(true);
   const [activeDragLogo, setActiveDragLogo] = useState<string | null>(null);
   const { toast } = useToast();
-  
-  // References to bin elements for collision detection
-  const binRefs = useRef<Map<string, HTMLElement>>(new Map());
-  
-  // Handle timer
-  useEffect(() => {
-    if (!isTimerRunning) return;
-    
-    const interval = setInterval(() => {
-      setTimer((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          setIsTimerRunning(false);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    
-    return () => clearInterval(interval);
-  }, [isTimerRunning]);
 
   // Check if enough logos have been sorted
   const sortedCount = Object.keys(sortedLogos).length;
-  const minSortedRequired = Math.min(10, logos.length); // At least 10 or all logos if less than 10
-  const canSubmit = sortedCount >= minSortedRequired || timer === 0;
+  const minSortedRequired = Math.min(10, logos.length);
+  const canSubmit = sortedCount >= minSortedRequired;
   
   // Handle drag start
   const handleDragStart = (logoId: string) => {
     setActiveDragLogo(logoId);
   };
   
-  // Handle drag end - check if logo is over a bin
-  const handleDragEnd = (logoId: string, event: MouseEvent) => {
-    if (!activeDragLogo) return;
+  // Handle drag end - check if logo is over a bin using Framer Motion's info
+  const handleDragEnd = (logoId: string, info: any) => {
+    if (!activeDragLogo) {
+      setActiveDragLogo(null);
+      return;
+    }
+    
+    // Get the drag end position from Framer Motion
+    const { point } = info;
     
     // Get all bin elements
     const binElements = document.querySelectorAll('[data-bin-id]');
@@ -74,18 +57,19 @@ const LogoSortGame = ({ data, onProgress }: LogoSortProps) => {
     for (const binElement of binElements) {
       const rect = binElement.getBoundingClientRect();
       
-      // Check if the mouse position is inside the bin's rectangle
+      // Check if the drop position is inside the bin's rectangle
       if (
-        event.clientX >= rect.left && 
-        event.clientX <= rect.right &&
-        event.clientY >= rect.top &&
-        event.clientY <= rect.bottom
+        point.x >= rect.left && 
+        point.x <= rect.right &&
+        point.y >= rect.top &&
+        point.y <= rect.bottom
       ) {
         // Found a bin that the logo was dropped on
         const binId = binElement.getAttribute('data-bin-id');
         if (binId) {
           handleDrop(logoId, binId);
-          break;
+          setActiveDragLogo(null);
+          return;
         }
       }
     }
@@ -148,11 +132,11 @@ const LogoSortGame = ({ data, onProgress }: LogoSortProps) => {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Timer */}
+      {/* Progress */}
       <div className="bg-bronze/10 rounded-lg p-2 mb-4 flex items-center justify-between">
-        <span className="text-sm font-medium">Time Remaining</span>
+        <span className="text-sm font-medium">Sorted</span>
         <span className="text-lg font-bold text-bronze">
-          {timer} seconds
+          {sortedCount} / {minSortedRequired}
         </span>
       </div>
 
@@ -182,7 +166,7 @@ const LogoSortGame = ({ data, onProgress }: LogoSortProps) => {
                 isSorted={isSorted}
                 sortedBinId={sortedLogos[logo.id]}
                 onDragStart={() => handleDragStart(logo.id)}
-                onDragEnd={() => handleDragEnd(logo.id, event as unknown as MouseEvent)}
+                onDragEnd={(info) => handleDragEnd(logo.id, info)}
               />
             );
           })}
@@ -195,7 +179,7 @@ const LogoSortGame = ({ data, onProgress }: LogoSortProps) => {
         disabled={!canSubmit}
         onClick={handleSubmit}
       >
-        {timer === 0 ? "Time's Up! Submit" : `Sort ${sortedCount}/${minSortedRequired} Logos`}
+        Complete ({sortedCount}/{minSortedRequired} sorted)
         {canSubmit && <Check size={16} className="ml-1" />}
       </Button>
     </div>

@@ -10,7 +10,7 @@ interface LogoItemProps {
   isSorted: boolean;
   sortedBinId?: string;
   onDragStart?: () => void;
-  onDragEnd?: () => void;
+  onDragEnd?: (info: any) => void;
 }
 
 const LogoItem = ({ 
@@ -24,7 +24,6 @@ const LogoItem = ({
 }: LogoItemProps) => {
   const [isDragging, setIsDragging] = useState(false);
   
-  // We'll use Framer Motion's own drag handlers instead of our custom hook
   const handleDragStart = (event: any, info: any) => {
     if (isSorted) return;
     setIsDragging(true);
@@ -34,27 +33,31 @@ const LogoItem = ({
   const handleDragEnd = (event: any, info: any) => {
     if (isSorted) return;
     setIsDragging(false);
-    if (onDragEnd) onDragEnd();
+    if (onDragEnd) onDragEnd(info);
   };
 
   return (
     <motion.div
       className={`relative rounded-lg overflow-hidden border-2 ${
-        isDragging 
-          ? 'border-bronze shadow-lg z-10' 
-          : isSorted 
-            ? 'border-bronze/50 opacity-50' 
-            : 'border-transparent hover:border-bronze/30'
-      } transition-all`}
-      whileTap={{ scale: isSorted ? 1 : 0.95 }}
+        isSorted 
+          ? 'border-bronze/50 opacity-50' 
+          : 'border-transparent hover:border-bronze/30'
+      } bg-background`}
+      whileTap={{ scale: isSorted ? 1 : 0.98 }}
+      whileDrag={{ 
+        scale: 1.15, 
+        rotate: 3,
+        zIndex: 50,
+        boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
+        cursor: "grabbing"
+      }}
       drag={!isSorted}
-      dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-      dragElastic={0.2}
-      dragMomentum={false}
+      dragSnapToOrigin={true}
+      dragElastic={0.1}
+      dragTransition={{ bounceStiffness: 300, bounceDamping: 20 }}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       style={{ cursor: isSorted ? 'default' : 'grab' }}
-      // We'll store the logo ID in the data attribute so we can identify it when dropped
       data-logo-id={id}
     >
       <div className="aspect-square relative">
