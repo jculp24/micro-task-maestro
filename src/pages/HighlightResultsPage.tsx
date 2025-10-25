@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Download } from "lucide-react";
-import { Canvas as FabricCanvas, Polygon as FabricPolygon } from "fabric";
+import { fabric } from "fabric";
 import { useToast } from "@/hooks/use-toast";
 
 interface PolygonData {
@@ -35,7 +35,7 @@ const HighlightResultsPage = () => {
   });
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
-  const [canvas, setCanvas] = useState<FabricCanvas | null>(null);
+  const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
 
   useEffect(() => {
     loadData();
@@ -108,7 +108,7 @@ const HighlightResultsPage = () => {
     const img = imageRef.current;
 
     const initCanvas = () => {
-      const fabricCanvas = new FabricCanvas(canvasRef.current!, {
+      const fabricCanvas = new fabric.Canvas(canvasRef.current!, {
         width: img.offsetWidth,
         height: img.offsetHeight,
         selection: false,
@@ -149,7 +149,7 @@ const HighlightResultsPage = () => {
           y: (p.y / 100) * canvas.height!,
         }));
 
-        const polygon = new FabricPolygon(points, {
+        const polygon = new fabric.Polygon(points, {
           fill: polygonData.type === 'like' ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)',
           stroke: polygonData.type === 'like' ? '#22c55e' : '#ef4444',
           strokeWidth: 1,

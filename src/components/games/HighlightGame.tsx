@@ -5,7 +5,7 @@ import { ThumbsUp, ThumbsDown, Undo, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/providers/UserProvider";
-import { Canvas as FabricCanvas, Polygon as FabricPolygon, Circle as FabricCircle, Line as FabricLine } from "fabric";
+import { fabric } from "fabric";
 
 interface HighlightGameProps {
   data: any;
@@ -29,7 +29,7 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
   const [polygons, setPolygons] = useState<PolygonData[]>([]);
   const [currentPoints, setCurrentPoints] = useState<Point[]>([]);
   const [selectedMarkerType, setSelectedMarkerType] = useState<'like' | 'dislike'>('like');
-  const [canvas, setCanvas] = useState<FabricCanvas | null>(null);
+  const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -47,7 +47,7 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
 
     // Wait for image to load
     const initCanvas = () => {
-      const fabricCanvas = new FabricCanvas(canvasRef.current!, {
+      const fabricCanvas = new fabric.Canvas(canvasRef.current!, {
         width: img.offsetWidth,
         height: img.offsetHeight,
         selection: false,
@@ -77,7 +77,7 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
     const newPoint = { x: pointer.x, y: pointer.y };
 
     // Add point marker
-    const circle = new FabricCircle({
+    const circle = new fabric.Circle({
       left: newPoint.x,
       top: newPoint.y,
       radius: 4,
@@ -92,7 +92,7 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
     // Draw line from previous point
     if (currentPoints.length > 0) {
       const prevPoint = currentPoints[currentPoints.length - 1];
-      const line = new FabricLine([prevPoint.x, prevPoint.y, newPoint.x, newPoint.y], {
+      const line = new fabric.Line([prevPoint.x, prevPoint.y, newPoint.x, newPoint.y], {
         stroke: selectedMarkerType === 'like' ? '#22c55e' : '#ef4444',
         strokeWidth: 2,
         selectable: false,
@@ -128,7 +128,7 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
     }));
 
     // Create final polygon
-    const polygon = new FabricPolygon(currentPoints, {
+    const polygon = new fabric.Polygon(currentPoints, {
       fill: selectedMarkerType === 'like' ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)',
       stroke: selectedMarkerType === 'like' ? '#22c55e' : '#ef4444',
       strokeWidth: 2,
@@ -138,7 +138,7 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
 
     // Clear temporary markers
     canvas.getObjects().forEach(obj => {
-      if (obj instanceof FabricCircle || obj instanceof FabricLine) {
+      if (obj.type === 'circle' || obj.type === 'line') {
         canvas.remove(obj);
       }
     });
@@ -201,7 +201,7 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
       // Remove last completed polygon
       const objects = canvas.getObjects();
       const lastPolygon = objects[objects.length - 1];
-      if (lastPolygon instanceof FabricPolygon) {
+      if (lastPolygon.type === 'polygon') {
         canvas.remove(lastPolygon);
         setPolygons(polygons.slice(0, -1));
       }
