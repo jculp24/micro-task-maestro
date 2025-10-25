@@ -138,33 +138,31 @@ const HigherLowerGame = ({ data, onProgress }: HigherLowerGameProps) => {
       {/* Guess buttons */}
       <div className="flex gap-4 w-full max-w-xs">
         <Button
-          variant="outline"
-          className={`flex-1 flex items-center justify-center gap-2 py-6
-                     ${selectedGuess !== null ? 'opacity-50 cursor-not-allowed' : ''}
-                     ${showActualPrice && selectedGuess === 'higher' 
-                       ? isCorrect ? 'border-green-500 text-green-500' : 'border-red-500 text-red-500'
-                       : 'border-bronze'
-                     }`}
-          onClick={() => selectedGuess === null && handleGuess('higher')}
-          disabled={selectedGuess !== null}
-        >
-          <ArrowUp className="h-5 w-5" />
-          <span className="font-medium">Higher</span>
-        </Button>
-        
-        <Button
-          variant="outline"
-          className={`flex-1 flex items-center justify-center gap-2 py-6
+          className={`flex-1 flex items-center justify-center gap-2 py-6 bg-red-500 hover:bg-red-600 text-white border-0
                      ${selectedGuess !== null ? 'opacity-50 cursor-not-allowed' : ''}
                      ${showActualPrice && selectedGuess === 'lower' 
-                       ? isCorrect ? 'border-green-500 text-green-500' : 'border-red-500 text-red-500'
-                       : 'border-bronze'
+                       ? isCorrect ? 'ring-2 ring-green-500' : 'ring-2 ring-red-700'
+                       : ''
                      }`}
           onClick={() => selectedGuess === null && handleGuess('lower')}
           disabled={selectedGuess !== null}
         >
           <ArrowDown className="h-5 w-5" />
           <span className="font-medium">Lower</span>
+        </Button>
+        
+        <Button
+          className={`flex-1 flex items-center justify-center gap-2 py-6 bg-green-500 hover:bg-green-600 text-white border-0
+                     ${selectedGuess !== null ? 'opacity-50 cursor-not-allowed' : ''}
+                     ${showActualPrice && selectedGuess === 'higher' 
+                       ? isCorrect ? 'ring-2 ring-green-500' : 'ring-2 ring-red-700'
+                       : ''
+                     }`}
+          onClick={() => selectedGuess === null && handleGuess('higher')}
+          disabled={selectedGuess !== null}
+        >
+          <ArrowUp className="h-5 w-5" />
+          <span className="font-medium">Higher</span>
         </Button>
       </div>
     </div>
