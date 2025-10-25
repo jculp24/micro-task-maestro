@@ -28,6 +28,7 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
   const [polygons, setPolygons] = useState<PolygonData[]>([]);
   const [currentPoints, setCurrentPoints] = useState<Point[]>([]);
   const [selectedMarkerType, setSelectedMarkerType] = useState<'like' | 'dislike'>('like');
+  const [isDrawing, setIsDrawing] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -100,17 +101,21 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
           ctx.lineTo(point.x, point.y);
         });
         ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3;
         ctx.stroke();
       }
 
-      // Draw point markers
-      currentPoints.forEach(point => {
+      // Draw starting point marker (larger circle)
+      if (currentPoints.length > 0) {
+        const firstPoint = currentPoints[0];
         ctx.beginPath();
-        ctx.arc(point.x, point.y, 4, 0, Math.PI * 2);
+        ctx.arc(firstPoint.x, firstPoint.y, 6, 0, Math.PI * 2);
         ctx.fillStyle = color;
         ctx.fill();
-      });
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
     }
   };
 
@@ -124,7 +129,7 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
     y: (point.y / 100) * height,
   });
 
-  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -132,20 +137,41 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    setCurrentPoints([...currentPoints, { x, y }]);
+    setIsDrawing(true);
+    setCurrentPoints([{ x, y }]);
   };
 
-  const handleCanvasDoubleClick = () => {
-    if (currentPoints.length < 3) {
-      toast({
-        title: "Need more points",
-        description: "Draw at least 3 points to create a polygon",
-        variant: "destructive",
-      });
-      return;
-    }
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return;
 
-    completePolygon();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // Add point to create smooth continuous line
+    setCurrentPoints(prev => [...prev, { x, y }]);
+  };
+
+  const handleMouseUp = () => {
+    if (!isDrawing) return;
+    
+    setIsDrawing(false);
+    
+    if (currentPoints.length >= 3) {
+      completePolygon();
+    } else {
+      // Not enough points, clear the drawing
+      setCurrentPoints([]);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (isDrawing) {
+      handleMouseUp();
+    }
   };
 
   const completePolygon = async () => {
@@ -239,7 +265,7 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
       <div className="text-center mb-4">
         <p className="text-lg font-medium">{currentImage.prompt}</p>
         <p className="text-sm text-muted-foreground">
-          Draw polygons on areas you like (green) or dislike (red). Double-click to complete each shape.
+          Click and drag to draw custom shapes around areas you like or dislike. Release to complete.
         </p>
       </div>
       
@@ -247,9 +273,11 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
       <div className="flex bg-muted rounded-full p-1 mb-4">
         <Button
           variant="ghost"
-          className={`px-4 rounded-full ${selectedMarkerType === 'like' 
-            ? 'bg-background text-foreground' 
-            : 'text-muted-foreground'}`}
+          className={`px-4 rounded-full transition-colors ${
+            selectedMarkerType === 'like' 
+              ? 'bg-green-500 text-white hover:bg-green-600' 
+              : 'text-muted-foreground hover:bg-muted'
+          }`}
           onClick={() => setSelectedMarkerType('like')}
         >
           <ThumbsUp className="h-4 w-4 mr-2" />
@@ -257,9 +285,11 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
         </Button>
         <Button
           variant="ghost"
-          className={`px-4 rounded-full ${selectedMarkerType === 'dislike' 
-            ? 'bg-background text-foreground' 
-            : 'text-muted-foreground'}`}
+          className={`px-4 rounded-full transition-colors ${
+            selectedMarkerType === 'dislike' 
+              ? 'bg-red-500 text-white hover:bg-red-600' 
+              : 'text-muted-foreground hover:bg-muted'
+          }`}
           onClick={() => setSelectedMarkerType('dislike')}
         >
           <ThumbsDown className="h-4 w-4 mr-2" />
@@ -273,7 +303,7 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
           variant="outline"
           size="sm"
           onClick={handleUndo}
-          disabled={polygons.length === 0 && currentPoints.length === 0}
+          disabled={polygons.length === 0 || isDrawing}
         >
           <Undo className="h-4 w-4 mr-2" />
           Undo
@@ -282,18 +312,10 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
           variant="outline"
           size="sm"
           onClick={handleClear}
-          disabled={polygons.length === 0 && currentPoints.length === 0}
+          disabled={polygons.length === 0 || isDrawing}
         >
           <Trash2 className="h-4 w-4 mr-2" />
           Clear All
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={completePolygon}
-          disabled={currentPoints.length < 3}
-        >
-          Complete Shape
         </Button>
       </div>
       
@@ -319,15 +341,17 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
         <canvas 
           ref={canvasRef}
           className="absolute inset-0 cursor-crosshair"
-          onClick={handleCanvasClick}
-          onDoubleClick={handleCanvasDoubleClick}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
         />
       </div>
       
       <div className="flex justify-between w-full">
         <div className="text-sm text-muted-foreground">
-          {polygons.length} polygon{polygons.length !== 1 ? 's' : ''} drawn
-          {currentPoints.length > 0 && ` (${currentPoints.length} points in progress)`}
+          {polygons.length} shape{polygons.length !== 1 ? 's' : ''} drawn
+          {isDrawing && ' (drawing...)'}
         </div>
         <Button 
           onClick={handleNext}
