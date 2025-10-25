@@ -5,8 +5,6 @@ import { ThumbsUp, ThumbsDown, Undo, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/providers/UserProvider";
-// @ts-ignore - Fabric.js v5 has complex type definitions
-import fabric from "fabric";
 
 interface HighlightGameProps {
   data: any;
@@ -30,7 +28,6 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
   const [polygons, setPolygons] = useState<PolygonData[]>([]);
   const [currentPoints, setCurrentPoints] = useState<Point[]>([]);
   const [selectedMarkerType, setSelectedMarkerType] = useState<'like' | 'dislike'>('like');
-  const [canvas, setCanvas] = useState<any | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -39,76 +36,105 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
   
   const currentImage = images[currentIndex];
 
-  // Initialize canvas
+  // Initialize and draw canvas
   useEffect(() => {
-    if (!canvasRef.current || !imageRef.current || !containerRef.current) return;
+    if (!canvasRef.current || !imageRef.current) return;
 
+    const canvas = canvasRef.current;
     const img = imageRef.current;
-    const container = containerRef.current;
+    
+    // Set canvas size to match image
+    canvas.width = img.offsetWidth;
+    canvas.height = img.offsetHeight;
 
-    // Wait for image to load
-    const initCanvas = () => {
-      // @ts-ignore
-      const fabricCanvas = new fabric.Canvas(canvasRef.current!, {
-        width: img.offsetWidth,
-        height: img.offsetHeight,
-        selection: false,
-      });
+    // Redraw everything
+    drawCanvas();
+  }, [polygons, currentPoints, currentImage]);
 
-      setCanvas(fabricCanvas);
-    };
-
-    if (img.complete) {
-      initCanvas();
-    } else {
-      img.onload = initCanvas;
-    }
-
-    return () => {
-      if (canvas) {
-        canvas.dispose();
-      }
-    };
-  }, [currentImage]);
-
-  // Handle canvas click to add points
-  const handleCanvasClick = (e: any) => {
+  const drawCanvas = () => {
+    const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const pointer = canvas.getScenePoint(e.e);
-    const newPoint = { x: pointer.x, y: pointer.y };
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-    // Add point marker
-    // @ts-ignore
-    const circle = new fabric.Circle({
-      left: newPoint.x,
-      top: newPoint.y,
-      radius: 4,
-      fill: selectedMarkerType === 'like' ? '#22c55e' : '#ef4444',
-      originX: 'center',
-      originY: 'center',
-      selectable: false,
-      hoverCursor: 'default',
-    });
-    canvas.add(circle);
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw line from previous point
-    if (currentPoints.length > 0) {
-      const prevPoint = currentPoints[currentPoints.length - 1];
-      // @ts-ignore
-      const line = new fabric.Line([prevPoint.x, prevPoint.y, newPoint.x, newPoint.y], {
-        stroke: selectedMarkerType === 'like' ? '#22c55e' : '#ef4444',
-        strokeWidth: 2,
-        selectable: false,
-        hoverCursor: 'default',
+    // Draw completed polygons
+    polygons.forEach((polygon) => {
+      if (polygon.points.length < 2) return;
+
+      ctx.beginPath();
+      const firstPoint = denormalizePoint(polygon.points[0], canvas.width, canvas.height);
+      ctx.moveTo(firstPoint.x, firstPoint.y);
+
+      polygon.points.slice(1).forEach((point) => {
+        const denormalized = denormalizePoint(point, canvas.width, canvas.height);
+        ctx.lineTo(denormalized.x, denormalized.y);
       });
-      canvas.add(line);
-    }
 
-    setCurrentPoints([...currentPoints, newPoint]);
+      ctx.closePath();
+      
+      // Fill
+      ctx.fillStyle = polygon.type === 'like' 
+        ? 'rgba(34, 197, 94, 0.4)' 
+        : 'rgba(239, 68, 68, 0.4)';
+      ctx.fill();
+
+      // Stroke
+      ctx.strokeStyle = polygon.type === 'like' ? '#22c55e' : '#ef4444';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    });
+
+    // Draw current points being drawn
+    if (currentPoints.length > 0) {
+      const color = selectedMarkerType === 'like' ? '#22c55e' : '#ef4444';
+
+      // Draw lines between points
+      if (currentPoints.length > 1) {
+        ctx.beginPath();
+        ctx.moveTo(currentPoints[0].x, currentPoints[0].y);
+        currentPoints.slice(1).forEach(point => {
+          ctx.lineTo(point.x, point.y);
+        });
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      // Draw point markers
+      currentPoints.forEach(point => {
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+      });
+    }
   };
 
-  // Complete polygon on double click
+  const normalizePoint = (point: Point, width: number, height: number): Point => ({
+    x: (point.x / width) * 100,
+    y: (point.y / height) * 100,
+  });
+
+  const denormalizePoint = (point: Point, width: number, height: number): Point => ({
+    x: (point.x / 100) * width,
+    y: (point.y / 100) * height,
+  });
+
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    setCurrentPoints([...currentPoints, { x, y }]);
+  };
+
   const handleCanvasDoubleClick = () => {
     if (currentPoints.length < 3) {
       toast({
@@ -123,33 +149,13 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
   };
 
   const completePolygon = async () => {
+    const canvas = canvasRef.current;
     if (!canvas || currentPoints.length < 3) return;
 
     // Normalize points to percentages
-    const normalizedPoints = currentPoints.map(p => ({
-      x: (p.x / canvas.width!) * 100,
-      y: (p.y / canvas.height!) * 100,
-    }));
-
-    // Create final polygon
-    // @ts-ignore
-    const polygon = new fabric.Polygon(currentPoints, {
-      fill: selectedMarkerType === 'like' ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)',
-      stroke: selectedMarkerType === 'like' ? '#22c55e' : '#ef4444',
-      strokeWidth: 2,
-      selectable: false,
-      hoverCursor: 'default',
-    });
-
-    // Clear temporary markers
-    canvas.getObjects().forEach(obj => {
-      if (obj.type === 'circle' || obj.type === 'line') {
-        canvas.remove(obj);
-      }
-    });
-
-    // Add final polygon
-    canvas.add(polygon);
+    const normalizedPoints = currentPoints.map(p => 
+      normalizePoint(p, canvas.width, canvas.height)
+    );
 
     const newPolygon: PolygonData = {
       points: normalizedPoints,
@@ -194,37 +200,22 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
   };
 
   const handleUndo = () => {
-    if (!canvas) return;
-
     if (currentPoints.length > 0) {
-      // Remove last point and its line
-      const objects = canvas.getObjects();
-      const toRemove = objects.slice(-2); // Last circle and line
-      toRemove.forEach(obj => canvas.remove(obj));
+      // Remove last point
       setCurrentPoints(currentPoints.slice(0, -1));
     } else if (polygons.length > 0) {
       // Remove last completed polygon
-      const objects = canvas.getObjects();
-      const lastPolygon = objects[objects.length - 1];
-      if (lastPolygon.type === 'polygon') {
-        canvas.remove(lastPolygon);
-        setPolygons(polygons.slice(0, -1));
-      }
+      setPolygons(polygons.slice(0, -1));
     }
   };
 
   const handleClear = () => {
-    if (!canvas) return;
-    canvas.getObjects().forEach(obj => canvas.remove(obj));
     setPolygons([]);
     setCurrentPoints([]);
   };
 
   const handleNext = () => {
     // Clear for next image
-    if (canvas) {
-      canvas.getObjects().forEach(obj => canvas.remove(obj));
-    }
     setPolygons([]);
     setCurrentPoints([]);
     
@@ -234,18 +225,6 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
     
     onProgress();
   };
-
-  useEffect(() => {
-    if (!canvas) return;
-
-    canvas.on('mouse:down', handleCanvasClick);
-    canvas.on('mouse:dblclick', handleCanvasDoubleClick);
-
-    return () => {
-      canvas.off('mouse:down', handleCanvasClick);
-      canvas.off('mouse:dblclick', handleCanvasDoubleClick);
-    };
-  }, [canvas, currentPoints, selectedMarkerType, polygons]);
 
   if (!currentImage) {
     return (
@@ -328,10 +307,20 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
           src={currentImage.image} 
           alt="Highlight this"
           className="w-full object-contain"
+          onLoad={() => {
+            // Redraw canvas when image loads
+            if (canvasRef.current && imageRef.current) {
+              canvasRef.current.width = imageRef.current.offsetWidth;
+              canvasRef.current.height = imageRef.current.offsetHeight;
+              drawCanvas();
+            }
+          }}
         />
         <canvas 
           ref={canvasRef}
           className="absolute inset-0 cursor-crosshair"
+          onClick={handleCanvasClick}
+          onDoubleClick={handleCanvasDoubleClick}
         />
       </div>
       

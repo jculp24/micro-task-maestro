@@ -4,8 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Download } from "lucide-react";
-// @ts-ignore - Fabric.js v5 has complex type definitions
-import fabric from "fabric";
 import { useToast } from "@/hooks/use-toast";
 
 interface PolygonData {
@@ -36,7 +34,6 @@ const HighlightResultsPage = () => {
   });
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
-  const [canvas, setCanvas] = useState<any | null>(null);
 
   useEffect(() => {
     loadData();
@@ -102,88 +99,87 @@ const HighlightResultsPage = () => {
     }
   };
 
-  // Initialize canvas when image loads
+  // Draw canvas when image loads or responses change
   useEffect(() => {
     if (!canvasRef.current || !imageRef.current || !imageUrl) return;
+    
+    drawCanvas();
+  }, [responses, imageUrl]);
 
+  const denormalizePoint = (point: { x: number; y: number }, width: number, height: number) => ({
+    x: (point.x / 100) * width,
+    y: (point.y / 100) * height,
+  });
+
+  const drawCanvas = () => {
+    const canvas = canvasRef.current;
     const img = imageRef.current;
+    if (!canvas || !img) return;
 
-    const initCanvas = () => {
-      // @ts-ignore
-      const fabricCanvas = new fabric.Canvas(canvasRef.current!, {
-        width: img.offsetWidth,
-        height: img.offsetHeight,
-        selection: false,
-      });
+    // Set canvas size to match image
+    canvas.width = img.offsetWidth;
+    canvas.height = img.offsetHeight;
 
-      setCanvas(fabricCanvas);
-    };
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-    if (img.complete) {
-      initCanvas();
-    } else {
-      img.onload = initCanvas;
-    }
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    return () => {
-      if (canvas) {
-        canvas.dispose();
-      }
-    };
-  }, [imageUrl]);
-
-  // Render polygons when canvas and responses are ready
-  useEffect(() => {
-    if (!canvas || responses.length === 0) return;
-
-    // Clear existing polygons
-    canvas.getObjects().forEach(obj => canvas.remove(obj));
-
-    // Render all polygons
+    // Draw all polygons
     responses.forEach((response: ResponseData) => {
       // Handle both old single polygon format and new array format
       const polygonArray = response.polygons || (response.polygon ? [response.polygon] : []);
       
       polygonArray.forEach((polygonData: PolygonData) => {
+        if (polygonData.points.length < 2) return;
+
         // Denormalize points from percentages
-        const points = polygonData.points.map(p => ({
-          x: (p.x / 100) * canvas.width!,
-          y: (p.y / 100) * canvas.height!,
-        }));
+        const points = polygonData.points.map(p => 
+          denormalizePoint(p, canvas.width, canvas.height)
+        );
 
-        // @ts-ignore
-        const polygon = new fabric.Polygon(points, {
-          fill: polygonData.type === 'like' ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)',
-          stroke: polygonData.type === 'like' ? '#22c55e' : '#ef4444',
-          strokeWidth: 1,
-          selectable: false,
-          hoverCursor: 'default',
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        
+        points.slice(1).forEach(point => {
+          ctx.lineTo(point.x, point.y);
         });
+        
+        ctx.closePath();
 
-        canvas.add(polygon);
+        // Fill with transparency for heatmap effect
+        ctx.fillStyle = polygonData.type === 'like' 
+          ? 'rgba(34, 197, 94, 0.3)' 
+          : 'rgba(239, 68, 68, 0.3)';
+        ctx.fill();
+
+        // Stroke
+        ctx.strokeStyle = polygonData.type === 'like' ? '#22c55e' : '#ef4444';
+        ctx.lineWidth = 1;
+        ctx.stroke();
       });
     });
-
-    canvas.renderAll();
-  }, [canvas, responses]);
+  };
 
   const handleDownload = () => {
+    const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const dataURL = canvas.toDataURL({
-      format: 'png',
-      quality: 1,
-      multiplier: 1,
-    });
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.download = `highlight-results-${imageId}.png`;
+      link.href = url;
+      link.click();
+      URL.revokeObjectURL(url);
 
-    const link = document.createElement('a');
-    link.download = `highlight-results-${imageId}.png`;
-    link.href = dataURL;
-    link.click();
-
-    toast({
-      title: "Downloaded",
-      description: "Results image saved to your device",
+      toast({
+        title: "Downloaded",
+        description: "Results image saved to your device",
+      });
     });
   };
 
@@ -224,6 +220,7 @@ const HighlightResultsPage = () => {
                     src={imageUrl}
                     alt="Highlight results"
                     className="w-full object-contain"
+                    onLoad={drawCanvas}
                   />
                   <canvas 
                     ref={canvasRef}
