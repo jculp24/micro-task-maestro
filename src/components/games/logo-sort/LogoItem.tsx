@@ -36,28 +36,31 @@ const LogoItem = ({
     if (onDragEnd) onDragEnd(info);
   };
 
+  // Don't render if already sorted
+  if (isSorted) {
+    return null;
+  }
+
   return (
     <motion.div
-      className={`relative rounded-lg overflow-hidden border-2 ${
-        isSorted 
-          ? 'border-bronze/50 opacity-50' 
-          : 'border-transparent hover:border-bronze/30'
-      } bg-background`}
-      whileTap={{ scale: isSorted ? 1 : 0.98 }}
+      className="relative rounded-lg overflow-hidden border-2 border-transparent hover:border-bronze/30 bg-background"
+      initial={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.8 }}
+      whileTap={{ scale: 0.98 }}
       whileDrag={{ 
         scale: 1.15, 
         rotate: 3,
-        zIndex: 50,
+        zIndex: 100,
         boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
         cursor: "grabbing"
       }}
-      drag={!isSorted}
+      drag={true}
       dragSnapToOrigin={true}
       dragElastic={0.1}
       dragTransition={{ bounceStiffness: 300, bounceDamping: 20 }}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      style={{ cursor: isSorted ? 'default' : 'grab' }}
+      style={{ cursor: 'grab', zIndex: isDragging ? 100 : 1 }}
       data-logo-id={id}
     >
       <div className="aspect-square relative">
@@ -70,12 +73,6 @@ const LogoItem = ({
           {name}
         </div>
       </div>
-      
-      {isSorted && (
-        <div className="absolute top-0 right-0 bg-bronze rounded-bl-lg p-1">
-          <Check size={16} className="text-white" />
-        </div>
-      )}
     </motion.div>
   );
 };

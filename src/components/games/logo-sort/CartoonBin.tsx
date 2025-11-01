@@ -26,6 +26,7 @@ const CartoonBin = ({ id, label, onDrop }: CartoonBinProps) => {
         className={`w-32 h-32 rounded-xl flex items-center justify-center p-3
           ${isOver ? 'bg-bronze/40 border-bronze' : 'bg-bronze/10 border-bronze/30'}
           border-3 overflow-hidden relative`}
+        style={{ zIndex: 0 }}
         animate={isOver ? { 
           scale: 1.1,
           boxShadow: "0 0 20px rgba(205, 127, 50, 0.5)"
