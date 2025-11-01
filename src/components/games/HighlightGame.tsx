@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
-import { ThumbsUp, ThumbsDown, Undo, Trash2 } from "lucide-react";
+import { Brush, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/providers/UserProvider";
@@ -261,68 +260,14 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
   }
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="text-center mb-4">
-        <p className="text-lg font-medium">{currentImage.prompt}</p>
-        <p className="text-sm text-muted-foreground">
-          Click and drag to draw custom shapes around areas you like or dislike. Release to complete.
-        </p>
-      </div>
-      
-      {/* Toggle for marker type */}
-      <div className="flex bg-muted rounded-full p-1 mb-4">
-        <Button
-          variant="ghost"
-          className={`px-4 rounded-full transition-colors ${
-            selectedMarkerType === 'like' 
-              ? 'bg-green-500 text-white hover:bg-green-600' 
-              : 'text-muted-foreground hover:bg-muted'
-          }`}
-          onClick={() => setSelectedMarkerType('like')}
-        >
-          <ThumbsUp className="h-4 w-4 mr-2" />
-          Like
-        </Button>
-        <Button
-          variant="ghost"
-          className={`px-4 rounded-full transition-colors ${
-            selectedMarkerType === 'dislike' 
-              ? 'bg-red-500 text-white hover:bg-red-600' 
-              : 'text-muted-foreground hover:bg-muted'
-          }`}
-          onClick={() => setSelectedMarkerType('dislike')}
-        >
-          <ThumbsDown className="h-4 w-4 mr-2" />
-          Dislike
-        </Button>
-      </div>
-
-      {/* Drawing controls */}
-      <div className="flex gap-2 mb-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleUndo}
-          disabled={polygons.length === 0 || isDrawing}
-        >
-          <Undo className="h-4 w-4 mr-2" />
-          Undo
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleClear}
-          disabled={polygons.length === 0 || isDrawing}
-        >
-          <Trash2 className="h-4 w-4 mr-2" />
-          Clear All
-        </Button>
-      </div>
+    <div className="flex flex-col items-center max-w-2xl mx-auto px-4">
+      {/* Title */}
+      <h2 className="text-2xl font-bold text-center mb-6">{currentImage.prompt}</h2>
       
       {/* Image with canvas overlay */}
       <div 
         ref={containerRef}
-        className="w-full relative rounded-lg overflow-hidden border border-border mb-4"
+        className="w-full max-w-md relative rounded-xl overflow-hidden mb-6 shadow-lg"
       >
         <img 
           ref={imageRef}
@@ -348,18 +293,52 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
         />
       </div>
       
-      <div className="flex justify-between w-full">
-        <div className="text-sm text-muted-foreground">
-          {polygons.length} shape{polygons.length !== 1 ? 's' : ''} drawn
-          {isDrawing && ' (drawing...)'}
-        </div>
-        <Button 
-          onClick={handleNext}
-          className="bg-primary text-primary-foreground hover:bg-primary/90"
+      {/* Icon Buttons Row */}
+      <div className="flex items-center justify-center gap-4 mb-6">
+        {/* Like Button */}
+        <button
+          onClick={() => setSelectedMarkerType('like')}
+          disabled={isDrawing}
+          className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
+            selectedMarkerType === 'like'
+              ? 'bg-[#22c55e] text-white shadow-lg scale-110'
+              : 'bg-white text-[#22c55e] border-2 border-[#22c55e] hover:bg-[#22c55e]/10'
+          } disabled:opacity-50`}
         >
-          {currentIndex < images.length - 1 ? "Next Image" : "Finish"}
-        </Button>
+          <Brush size={24} />
+        </button>
+
+        {/* Undo Button */}
+        <button
+          onClick={handleUndo}
+          disabled={polygons.length === 0 || isDrawing}
+          className="w-14 h-14 rounded-full bg-white border-2 border-gray-300 text-gray-700 flex items-center justify-center hover:bg-gray-50 transition-all disabled:opacity-30"
+        >
+          <RotateCcw size={24} />
+        </button>
+
+        {/* Dislike Button */}
+        <button
+          onClick={() => setSelectedMarkerType('dislike')}
+          disabled={isDrawing}
+          className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
+            selectedMarkerType === 'dislike'
+              ? 'bg-[#ef4444] text-white shadow-lg scale-110'
+              : 'bg-white text-[#ef4444] border-2 border-[#ef4444] hover:bg-[#ef4444]/10'
+          } disabled:opacity-50`}
+        >
+          <Brush size={24} />
+        </button>
       </div>
+
+      {/* Submit Button */}
+      <Button 
+        onClick={handleNext}
+        disabled={polygons.length === 0}
+        className="w-full max-w-md h-12 text-base font-semibold bg-[#cd7f32] hover:bg-[#b8722d] text-white rounded-lg disabled:opacity-50"
+      >
+        Submit
+      </Button>
     </div>
   );
 };
