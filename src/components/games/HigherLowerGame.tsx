@@ -91,22 +91,20 @@ const HigherLowerGame = ({ data, onProgress }: HigherLowerGameProps) => {
   }
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="text-center mb-6">
-        <p className="text-lg font-medium">Is the actual price higher or lower?</p>
-        <p className="text-sm text-muted-foreground">
-          Guess whether the real price is higher or lower than shown
-        </p>
-      </div>
-      
+    <div className="flex flex-col items-center h-full">
       {/* Product card */}
-      <div className="w-full bg-card rounded-lg overflow-hidden border border-border mb-8">
-        <div className="aspect-video overflow-hidden relative">
+      <div className="w-full bg-card rounded-lg overflow-hidden border border-border mb-4 flex-1 flex flex-col">
+        <div className="h-[70vh] overflow-hidden relative flex-1">
           <img 
             src={currentProduct.image} 
             alt={currentProduct.name}
             className="w-full h-full object-cover"
           />
+          
+          {/* Product name overlay */}
+          <div className="absolute top-0 left-0 bg-background/80 backdrop-blur-sm px-3 py-2 m-4 rounded-md">
+            <h3 className="font-semibold text-sm">{currentProduct.name}</h3>
+          </div>
           
           {/* Price tag */}
           <div className="absolute bottom-0 right-0 bg-background/80 backdrop-blur-sm px-3 py-2 m-4 rounded-md">
@@ -125,13 +123,6 @@ const HigherLowerGame = ({ data, onProgress }: HigherLowerGameProps) => {
               </div>
             </div>
           </div>
-        </div>
-        
-        <div className="p-4">
-          <h3 className="font-semibold">{currentProduct.name}</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            {currentProduct.description}
-          </p>
         </div>
       </div>
       
