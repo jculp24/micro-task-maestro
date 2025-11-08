@@ -99,9 +99,6 @@ const ThisThatGame = ({ data, onProgress }: ThisThatGameProps) => {
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="p-3 text-center">
-            <h3 className="font-medium">{left.title}</h3>
-          </div>
         </motion.div>
         
         {/* VS Badge */}
@@ -128,9 +125,6 @@ const ThisThatGame = ({ data, onProgress }: ThisThatGameProps) => {
               alt={right.title}
               className="w-full h-full object-cover"
             />
-          </div>
-          <div className="p-3 text-center">
-            <h3 className="font-medium">{right.title}</h3>
           </div>
         </motion.div>
       </div>
