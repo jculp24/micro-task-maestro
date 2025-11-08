@@ -12,18 +12,18 @@ interface ThisThatGameProps {
 const ThisThatGame = ({ data, onProgress }: ThisThatGameProps) => {
   const comparisons = data?.comparisons || [];
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedSide, setSelectedSide] = useState<'left' | 'right' | null>(null);
+  const [selectedSide, setSelectedSide] = useState<'top' | 'bottom' | null>(null);
   const { toast } = useToast();
   
   // Get current comparison
   const currentComparison = comparisons[currentIndex % comparisons.length]; // Use modulo to cycle through items
   
-  const handleSelect = async (side: 'left' | 'right') => {
+  const handleSelect = async (side: 'top' | 'bottom') => {
     setSelectedSide(side);
 
     // Record response immediately
     try {
-      const selectedOption = side === 'left' ? currentComparison.left : currentComparison.right;
+      const selectedOption = side === 'top' ? currentComparison.left : currentComparison.right;
       const { error } = await supabase.functions.invoke('record-response', {
         body: {
           game_type: 'thisthat',
@@ -80,17 +80,17 @@ const ThisThatGame = ({ data, onProgress }: ThisThatGameProps) => {
         </p>
       </div>
       
-      <div className="flex justify-between gap-4 w-full">
-        {/* Left Option */}
+      <div className="flex flex-col items-center w-full max-w-md mx-auto relative gap-0">
+        {/* Top Option */}
         <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           animate={{ 
-            opacity: selectedSide === 'right' ? 0.5 : 1,
-            scale: selectedSide === 'left' ? 1.05 : 1
+            opacity: selectedSide === 'bottom' ? 0.5 : 1,
+            scale: selectedSide === 'top' ? 1.02 : 1
           }}
-          onClick={() => handleSelect('left')}
-          className="flex-1 bg-card rounded-lg overflow-hidden border border-border cursor-pointer transition-all"
+          onClick={() => handleSelect('top')}
+          className="w-full bg-card rounded-lg overflow-hidden border border-border cursor-pointer transition-all"
         >
           <div className="aspect-square overflow-hidden">
             <img 
@@ -104,16 +104,23 @@ const ThisThatGame = ({ data, onProgress }: ThisThatGameProps) => {
           </div>
         </motion.div>
         
-        {/* Right Option */}
+        {/* VS Badge */}
+        <div className="relative -my-6 z-10">
+          <div className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg" style={{ backgroundColor: '#cd7f32' }}>
+            VS
+          </div>
+        </div>
+        
+        {/* Bottom Option */}
         <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           animate={{ 
-            opacity: selectedSide === 'left' ? 0.5 : 1,
-            scale: selectedSide === 'right' ? 1.05 : 1
+            opacity: selectedSide === 'top' ? 0.5 : 1,
+            scale: selectedSide === 'bottom' ? 1.02 : 1
           }}
-          onClick={() => handleSelect('right')}
-          className="flex-1 bg-card rounded-lg overflow-hidden border border-border cursor-pointer transition-all"
+          onClick={() => handleSelect('bottom')}
+          className="w-full bg-card rounded-lg overflow-hidden border border-border cursor-pointer transition-all"
         >
           <div className="aspect-square overflow-hidden">
             <img 
