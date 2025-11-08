@@ -69,22 +69,10 @@ const HomePage = () => {
       description: "Guess Values",
     },
     {
-      id: "soundbyte",
-      name: "Sound Byte",
-      icon: <Headphones className="h-7 w-7 text-bronze" />,
-      description: "Rate Audio",
-    },
-    {
       id: "highlight",
       name: "Highlight",
       icon: <Image className="h-7 w-7 text-bronze" />,
       description: "Mark Magic",
-    },
-    {
-      id: "adlibpro",
-      name: "Ad Lib Pro",
-      icon: <MessageCircle className="h-7 w-7 text-bronze" />,
-      description: "Write Copy",
     },
     {
       id: "logosort",
@@ -106,7 +94,7 @@ const HomePage = () => {
       
       {isLoading ? (
         <div className="grid grid-cols-2 gap-5">
-          {[...Array(8)].map((_, i) => (
+          {[...Array(6)].map((_, i) => (
             <div 
               key={i} 
               className="h-36 bg-muted animate-pulse rounded-lg"
