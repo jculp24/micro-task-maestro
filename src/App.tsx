@@ -12,6 +12,7 @@ import HomePage from "@/pages/HomePage";
 import GamePage from "@/pages/GamePage";
 import WalletPage from "@/pages/WalletPage";
 import ProfilePage from "@/pages/ProfilePage";
+import LeaderboardPage from "@/pages/LeaderboardPage";
 import AuthPage from "@/pages/AuthPage";
 import NotFound from "@/pages/NotFound";
 import HighlightResultsPage from "@/pages/HighlightResultsPage";
@@ -35,6 +36,7 @@ const App = () => {
                 <Route path="/" element={<AppLayout />}>
                   <Route index element={<HomePage />} />
                   <Route path="game/:gameType" element={<GamePage />} />
+                  <Route path="leaderboard" element={<LeaderboardPage />} />
                   <Route path="wallet" element={<WalletPage />} />
                   <Route path="profile" element={<ProfilePage />} />
                   <Route path="results/highlight/:imageId" element={<HighlightResultsPage />} />

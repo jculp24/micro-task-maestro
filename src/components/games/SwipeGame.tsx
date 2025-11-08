@@ -3,8 +3,9 @@ import { useState } from "react";
 import { motion, PanInfo, useMotionValue, useTransform } from "framer-motion";
 import { Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/providers/UserProvider";
+import { useMicroReward } from "@/hooks/useMicroReward";
+import MicroRewardAnimation from "./MicroRewardAnimation";
 interface SwipeGameProps {
   data: any;
   onProgress: () => void;
@@ -14,8 +15,8 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
   const items = data?.items || [];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<"left" | "right" | null>(null);
-  const { toast } = useToast();
   const { updateBalance } = useUser();
+  const { showReward, rewardAmount, triggerReward } = useMicroReward();
 
   // Get the current item
   const currentItem = items[currentIndex % items.length]; // Use modulo to cycle through items
@@ -56,12 +57,8 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
 
       if (error) throw error;
 
-      // Show earning feedback
-      toast({
-        title: `+$${data.rewardPerAction.toFixed(2)}`,
-        description: `Earned for rating ${currentItem.title}`,
-        duration: 2000,
-      });
+      // Show micro-reward animation
+      triggerReward(data.rewardPerAction);
 
       // Update local balance immediately
       updateBalance(data.rewardPerAction);
@@ -94,6 +91,7 @@ const SwipeGame = ({ data, onProgress }: SwipeGameProps) => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[480px] pt-2 pb-2 relative">
+      <MicroRewardAnimation show={showReward} amount={rewardAmount} />
       {/* Indicators */}
       <div className="flex gap-20 absolute top-0 w-full justify-center">
         <motion.div 

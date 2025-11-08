@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useMicroReward } from "@/hooks/useMicroReward";
+import MicroRewardAnimation from "./MicroRewardAnimation";
 
 interface HigherLowerGameProps {
   data: any;
@@ -17,7 +18,7 @@ const HigherLowerGame = ({ data, onProgress }: HigherLowerGameProps) => {
   const [showActualPrice, setShowActualPrice] = useState(false);
   const [selectedGuess, setSelectedGuess] = useState<'higher' | 'lower' | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-  const { toast } = useToast();
+  const { showReward, rewardAmount, triggerReward } = useMicroReward();
   
   // Get current product
   const currentProduct = products[currentIndex];
@@ -58,12 +59,8 @@ const HigherLowerGame = ({ data, onProgress }: HigherLowerGameProps) => {
 
       if (error) throw error;
 
-      // Show earning feedback
-      toast({
-        title: `+$${data.rewardPerAction.toFixed(2)}`,
-        description: isGuessCorrect ? 'Correct guess!' : 'Nice try!',
-        duration: 2000,
-      });
+      // Show micro-reward animation
+      triggerReward(data.rewardPerAction);
 
       // Report progress
       onProgress();
@@ -92,6 +89,7 @@ const HigherLowerGame = ({ data, onProgress }: HigherLowerGameProps) => {
 
   return (
     <div className="flex flex-col items-center h-full">
+      <MicroRewardAnimation show={showReward} amount={rewardAmount} />
       {/* Product card */}
       <div className="w-full bg-card rounded-lg overflow-hidden border border-border mb-4 flex-1 flex flex-col">
         <div className="h-[70vh] overflow-hidden relative flex-1">

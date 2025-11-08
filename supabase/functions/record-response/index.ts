@@ -115,6 +115,46 @@ Deno.serve(async (req) => {
       throw updateError
     }
 
+    // Update or insert game-specific earnings
+    const { data: existingGameEarnings } = await supabaseClient
+      .from('game_type_earnings')
+      .select('total_earned, actions_completed')
+      .eq('user_id', user.id)
+      .eq('game_type', game_type)
+      .single()
+
+    if (existingGameEarnings) {
+      // Update existing record
+      const { error: gameEarningsError } = await supabaseClient
+        .from('game_type_earnings')
+        .update({
+          total_earned: parseFloat(existingGameEarnings.total_earned) + parseFloat(reward_amount),
+          actions_completed: existingGameEarnings.actions_completed + 1,
+          last_played: new Date().toISOString(),
+        })
+        .eq('user_id', user.id)
+        .eq('game_type', game_type)
+
+      if (gameEarningsError) {
+        console.error('Error updating game earnings:', gameEarningsError)
+      }
+    } else {
+      // Insert new record
+      const { error: gameEarningsError } = await supabaseClient
+        .from('game_type_earnings')
+        .insert({
+          user_id: user.id,
+          game_type,
+          total_earned: reward_amount,
+          actions_completed: 1,
+          last_played: new Date().toISOString(),
+        })
+
+      if (gameEarningsError) {
+        console.error('Error inserting game earnings:', gameEarningsError)
+      }
+    }
+
     console.log('Response recorded successfully. New balance:', newBalance)
 
     return new Response(

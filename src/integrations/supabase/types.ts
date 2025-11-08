@@ -49,6 +49,36 @@ export type Database = {
           },
         ]
       }
+      game_type_earnings: {
+        Row: {
+          actions_completed: number | null
+          created_at: string | null
+          game_type: string
+          id: string
+          last_played: string | null
+          total_earned: number | null
+          user_id: string
+        }
+        Insert: {
+          actions_completed?: number | null
+          created_at?: string | null
+          game_type: string
+          id?: string
+          last_played?: string | null
+          total_earned?: number | null
+          user_id: string
+        }
+        Update: {
+          actions_completed?: number | null
+          created_at?: string | null
+          game_type?: string
+          id?: string
+          last_played?: string | null
+          total_earned?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       highlight_images: {
         Row: {
           campaign_name: string | null
@@ -119,6 +149,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      leaderboard_profiles: {
+        Row: {
+          avatar_emoji: string | null
+          country_code: string
+          created_at: string | null
+          display_name: string
+          is_visible: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          avatar_emoji?: string | null
+          country_code?: string
+          created_at?: string | null
+          display_name: string
+          is_visible?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          avatar_emoji?: string | null
+          country_code?: string
+          created_at?: string | null
+          display_name?: string
+          is_visible?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -246,7 +306,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_rank: {
+        Args: { p_game_type: string; p_user_id: string }
+        Returns: {
+          rank: number
+          total_earned: number
+        }[]
+      }
     }
     Enums: {
       transaction_status: "pending" | "completed" | "failed"

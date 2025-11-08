@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useMicroReward } from "@/hooks/useMicroReward";
+import MicroRewardAnimation from "./MicroRewardAnimation";
 interface ThisThatGameProps {
   data: any;
   onProgress: () => void;
@@ -13,9 +14,7 @@ const ThisThatGame = ({
   const comparisons = data?.comparisons || [];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedSide, setSelectedSide] = useState<'top' | 'bottom' | null>(null);
-  const {
-    toast
-  } = useToast();
+  const { showReward, rewardAmount, triggerReward } = useMicroReward();
 
   // Get current comparison
   const currentComparison = comparisons[currentIndex % comparisons.length]; // Use modulo to cycle through items
@@ -43,12 +42,8 @@ const ThisThatGame = ({
       });
       if (error) throw error;
 
-      // Show earning feedback
-      toast({
-        title: `+$${data.rewardPerAction.toFixed(2)}`,
-        description: `Selected ${selectedOption.title}`,
-        duration: 2000
-      });
+      // Show micro-reward animation
+      triggerReward(data.rewardPerAction);
 
       // Report progress
       onProgress();
@@ -71,6 +66,7 @@ const ThisThatGame = ({
     right
   } = currentComparison;
   return <div className="flex flex-col items-center">
+      <MicroRewardAnimation show={showReward} amount={rewardAmount} />
       <div className="text-center mb-5">
         <p className="text-lg font-medium">{currentComparison.question}</p>
         <p className="text-sm text-muted-foreground mt-1">Tap your preference</p>
