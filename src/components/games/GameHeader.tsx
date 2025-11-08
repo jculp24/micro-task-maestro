@@ -1,4 +1,3 @@
-
 interface GameHeaderProps {
   gameType: string;
   title: string;
@@ -38,8 +37,8 @@ const GameHeader = ({
           {getGameTypeDisplay(gameType)}
         </span>
       </div>
-      <h1 className="text-xl font-bold mb-0.5">{title}</h1>
-      <p className="text-sm text-muted-foreground">{description}</p>
+      
+      
     </div>;
 };
 export default GameHeader;
