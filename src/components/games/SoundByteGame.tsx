@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { Play, Pause, ThumbsUp, ThumbsDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useMicroReward } from "@/hooks/useMicroReward";
+import MicroRewardAnimation from "./MicroRewardAnimation";
 
 interface SoundByteGameProps {
   data: any;
@@ -18,6 +20,7 @@ const SoundByteGame = ({ data, onProgress }: SoundByteGameProps) => {
   const [hasVoted, setHasVoted] = useState(false);
   const [waveformLevel, setWaveformLevel] = useState(0);
   const { toast } = useToast();
+  const { showReward, rewardAmount, triggerReward } = useMicroReward();
   
   // Get current audio clip
   const currentClip = audioClips[currentIndex];
@@ -63,12 +66,8 @@ const SoundByteGame = ({ data, onProgress }: SoundByteGameProps) => {
 
       if (error) throw error;
 
-      // Show earning feedback
-      toast({
-        title: `+$${data.rewardPerAction.toFixed(2)}`,
-        description: `Earned for rating ${currentClip.title}`,
-        duration: 2000,
-      });
+      // Show micro-reward animation
+      triggerReward(data.rewardPerAction);
 
       // Report progress
       onProgress();
@@ -95,6 +94,7 @@ const SoundByteGame = ({ data, onProgress }: SoundByteGameProps) => {
 
   return (
     <div className="flex flex-col items-center justify-center">
+      <MicroRewardAnimation show={showReward} amount={rewardAmount} />
       <div className="text-center mb-6">
         <p className="text-lg font-medium">{currentClip.title}</p>
         <p className="text-sm text-muted-foreground">{currentClip.description}</p>

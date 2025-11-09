@@ -4,6 +4,8 @@ import { Brush, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/providers/UserProvider";
+import { useMicroReward } from "@/hooks/useMicroReward";
+import MicroRewardAnimation from "./MicroRewardAnimation";
 
 interface HighlightGameProps {
   data: any;
@@ -33,6 +35,7 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { updateBalance } = useUser();
+  const { showReward, rewardAmount, triggerReward } = useMicroReward();
   
   const currentImage = images[currentIndex];
 
@@ -207,12 +210,8 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
 
       if (error) throw error;
 
-      // Show earning feedback
-      toast({
-        title: `+$${data.rewardPerAction.toFixed(2)}`,
-        description: `Polygon drawn`,
-        duration: 1500,
-      });
+      // Show micro-reward animation
+      triggerReward(data.rewardPerAction);
 
       // Update balance
       updateBalance(data.rewardPerAction);
@@ -261,6 +260,7 @@ const HighlightGame = ({ data, onProgress }: HighlightGameProps) => {
 
   return (
     <div className="flex flex-col items-center max-w-2xl mx-auto px-4">
+      <MicroRewardAnimation show={showReward} amount={rewardAmount} />
       {/* Title */}
       <h2 className="text-2xl font-bold text-center mb-6">{currentImage.prompt}</h2>
       

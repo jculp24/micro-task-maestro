@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useMicroReward } from "@/hooks/useMicroReward";
+import MicroRewardAnimation from "./MicroRewardAnimation";
 
 interface BracketGameProps {
   data: any;
@@ -12,6 +14,7 @@ interface BracketGameProps {
 const BracketGame = ({ data, onProgress }: BracketGameProps) => {
   const initialItems = data?.items || [];
   const { toast } = useToast();
+  const { showReward, rewardAmount, triggerReward } = useMicroReward();
   
   // Create initial bracket structure
   const [rounds, setRounds] = useState<any[][]>([]);
@@ -46,12 +49,8 @@ const BracketGame = ({ data, onProgress }: BracketGameProps) => {
 
       if (error) throw error;
 
-      // Show earning feedback
-      toast({
-        title: `+$${data.rewardPerAction.toFixed(2)}`,
-        description: `Earned for selecting ${item.title}`,
-        duration: 2000,
-      });
+      // Show micro-reward animation
+      triggerReward(data.rewardPerAction);
 
       // Report progress
       onProgress();
@@ -140,6 +139,7 @@ const BracketGame = ({ data, onProgress }: BracketGameProps) => {
 
   return (
     <div className="flex flex-col items-center">
+      <MicroRewardAnimation show={showReward} amount={rewardAmount} />
       <div className="text-sm text-center mb-4">
         <span className="font-medium">Round {currentRound + 1}</span>
         <span className="text-muted-foreground"> • Match {currentMatch + 1} of {Math.floor((rounds[currentRound]?.length || 0) / 2)}</span>

@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Mic, MicOff, Send, Volume2, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useMicroReward } from "@/hooks/useMicroReward";
+import MicroRewardAnimation from "./MicroRewardAnimation";
 
 interface AdLibGameProps {
   data: any;
@@ -15,6 +17,7 @@ interface AdLibGameProps {
 const AdLibGame = ({ data, onProgress }: AdLibGameProps) => {
   const { toast } = useToast();
   const templates = data?.templates || [];
+  const { showReward, rewardAmount, triggerReward } = useMicroReward();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [inputMethod, setInputMethod] = useState<"text" | "voice">("text");
   const [responses, setResponses] = useState<string[]>([]);
@@ -217,12 +220,8 @@ const AdLibGame = ({ data, onProgress }: AdLibGameProps) => {
 
       if (error) throw error;
 
-      // Show earning feedback
-      toast({
-        title: `+$${data.rewardPerAction.toFixed(2)}`,
-        description: `Great pitch! Template completed`,
-        duration: 2000,
-      });
+      // Show micro-reward animation
+      triggerReward(data.rewardPerAction);
 
       // Report progress
       onProgress();
@@ -277,6 +276,7 @@ const AdLibGame = ({ data, onProgress }: AdLibGameProps) => {
 
   return (
     <div className="flex flex-col h-[500px] relative">
+      <MicroRewardAnimation show={showReward} amount={rewardAmount} />
       {/* Product/Ad Image */}
       <div className="w-full mb-4">
         <div className="aspect-video w-full rounded-lg overflow-hidden bg-muted">

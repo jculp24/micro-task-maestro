@@ -6,6 +6,8 @@ import CartoonBin from './logo-sort/CartoonBin';
 import { Button } from '@/components/ui/button';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useMicroReward } from "@/hooks/useMicroReward";
+import MicroRewardAnimation from "./MicroRewardAnimation";
 
 interface LogoSortProps {
   data: any;
@@ -29,6 +31,7 @@ const LogoSortGame = ({ data, onProgress }: LogoSortProps) => {
   const [sortedLogos, setSortedLogos] = useState<Record<string, string>>({});
   const [activeDragLogo, setActiveDragLogo] = useState<string | null>(null);
   const { toast } = useToast();
+  const { showReward, rewardAmount, triggerReward } = useMicroReward();
 
   // Check if enough logos have been sorted
   const sortedCount = Object.keys(sortedLogos).length;
@@ -106,12 +109,8 @@ const LogoSortGame = ({ data, onProgress }: LogoSortProps) => {
 
       if (error) throw error;
 
-      // Show earning feedback
-      toast({
-        title: `+$${data.rewardPerAction.toFixed(2)}`,
-        description: `Sorted ${logo?.name}`,
-        duration: 1500,
-      });
+      // Show micro-reward animation
+      triggerReward(data.rewardPerAction);
 
       // Report progress
       onProgress();
@@ -132,6 +131,7 @@ const LogoSortGame = ({ data, onProgress }: LogoSortProps) => {
 
   return (
     <div className="flex flex-col h-full">
+      <MicroRewardAnimation show={showReward} amount={rewardAmount} />
       {/* Progress */}
       <div className="bg-bronze/10 rounded-lg p-2 mb-4 flex items-center justify-between">
         <span className="text-sm font-medium">Sorted</span>
