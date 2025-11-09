@@ -93,21 +93,21 @@ const LogoSortGame = ({ data, onProgress }: LogoSortProps) => {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-[600px]">
       <MicroRewardAnimation show={showReward} amount={rewardAmount} />
       
       {/* Progress */}
-      <div className="bg-bronze/10 rounded-lg p-2 mb-3 flex items-center justify-between">
+      <div className="bg-bronze/10 rounded-lg p-2 mb-2 flex items-center justify-between shrink-0">
         <span className="text-sm font-medium">Sorted: {sortedCount} / {minSortedRequired}</span>
         {currentLogo && (
-          <span className="text-sm font-medium text-muted-foreground">
-            Current: {currentLogo.name}
+          <span className="text-sm font-medium text-muted-foreground truncate ml-2">
+            {currentLogo.name}
           </span>
         )}
       </div>
 
       {/* Basketball Game Canvas */}
-      <div className="flex-1 relative rounded-lg overflow-hidden bg-gradient-to-b from-[#8B4513] to-[#654321]">
+      <div className="flex-1 min-h-0 relative rounded-lg overflow-hidden bg-gradient-to-b from-[#8B4513] to-[#654321]">
         <canvas 
           ref={canvasRef}
           className="w-full h-full"
@@ -115,18 +115,18 @@ const LogoSortGame = ({ data, onProgress }: LogoSortProps) => {
         />
         
         {/* Instructions overlay */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-background/80 backdrop-blur-sm px-4 py-2 rounded-lg text-sm text-center">
-          👈 Swipe left or right to shoot! 👉
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs text-center whitespace-nowrap">
+          👈 Swipe to shoot! 👉
         </div>
       </div>
 
       {/* Submit button */}
       <Button 
-        className="mt-4 border-bronze text-bronze hover:bg-bronze hover:text-white"
+        className="mt-2 shrink-0 border-bronze text-bronze hover:bg-bronze hover:text-white"
         disabled={!canSubmit}
         onClick={handleSubmit}
       >
-        Complete ({sortedCount}/{minSortedRequired} sorted)
+        Complete ({sortedCount}/{minSortedRequired})
         {canSubmit && <Check size={16} className="ml-1" />}
       </Button>
     </div>
