@@ -127,9 +127,7 @@ export class Ball {
       this.vy *= -physics.BOUNCE_DAMPING;
       this.vx *= physics.FRICTION;
       
-      if (Math.abs(this.vy) < 1 && Math.abs(this.vx) < 1) {
-        setTimeout(() => this.reset(canvasWidth, canvasHeight), 1000);
-      }
+      // Don't auto-reset - let the game controller handle reset timing
     }
 
     // Reset if out of bounds

@@ -85,7 +85,7 @@ export const useBasketballGame = ({
       gameRef.current?.destroy();
       window.removeEventListener('resize', handleResize);
     };
-  }, [canvasRef, currentLogo, bins, onScore]);
+  }, [canvasRef, bins, onScore]);
 
   // Load new logo when currentLogo changes (after scoring)
   useEffect(() => {

@@ -242,6 +242,9 @@ export class BasketballGame {
       hoop.collideWithBall(this.ball, PHYSICS);
       
       if (hoop.checkScore(this.ball)) {
+        // Immediately deactivate ball to prevent multiple scores
+        this.ball.isActive = false;
+        
         if (hoop.side === 'left') {
           this.scores.left++;
         } else {
