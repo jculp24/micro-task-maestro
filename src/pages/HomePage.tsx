@@ -106,7 +106,7 @@ const HomePage = () => {
           {games.map((game) => (
             <Card 
               key={game.id}
-              className="game-card bg-gradient-to-br from-[#2D2D2D] to-[#222] border-bronze/20 hover:border-bronze/60 
+              className="game-card bg-card border-bronze/20 hover:border-bronze/60 
                 cursor-pointer transition-all hover:shadow-lg transform hover:scale-[1.03] 
                 hover:translate-y-[-2px] aspect-square"
               onClick={() => handleGameSelect(game.id)}
@@ -115,8 +115,8 @@ const HomePage = () => {
                 <div className="rounded-full bg-gradient-to-br from-bronze/30 to-bronze/10 p-2.5">
                   {game.icon}
                 </div>
-                <h3 className="font-semibold text-base text-white">{game.name}</h3>
-                <p className="text-xs text-gray-400">{game.description}</p>
+                <h3 className="font-semibold text-base text-card-foreground">{game.name}</h3>
+                <p className="text-xs text-muted-foreground">{game.description}</p>
                 <div className="absolute top-2 right-2">
                   <span className="inline-flex items-center justify-center w-5 h-5 bg-bronze rounded-full">
                     <span className="text-[10px] font-bold text-white">$</span>
